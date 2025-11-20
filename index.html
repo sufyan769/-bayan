@@ -71,6 +71,18 @@
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
       }
+      .loader {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
     </style>
     
     <!-- Import Map for React and Algolia -->
@@ -104,12 +116,13 @@
         usePagination, 
         useStats,
         useRefinementList,
+        useCurrentRefinements,
         Highlight, 
         Snippet 
       } from 'react-instantsearch';
       import { 
         Search, Menu, Globe, X, ChevronLeft, ChevronRight, 
-        BookOpen, ArrowRight, ZoomIn, ZoomOut, Type, Filter, CheckCircle2, Quote, Plus, Library 
+        BookOpen, ArrowRight, ZoomIn, ZoomOut, Type, Filter, CheckCircle2, Quote, Plus, Library, ArrowDown, AlertTriangle 
       } from 'lucide-react';
 
       // --- Algolia Client Setup with CACHING ---
@@ -127,20 +140,8 @@
         ...algoliaClient,
         search(requests) {
           // 1. Prevent empty query searches (saves quota)
-          if (requests.every(({ params }) => !params.query)) {
-            return Promise.resolve({
-              results: requests.map(() => ({
-                hits: [],
-                nbHits: 0,
-                nbPages: 0,
-                page: 0,
-                processingTimeMS: 0,
-                hitsPerPage: 0,
-                exhaustiveNbHits: false,
-                query: '',
-                params: '',
-              })),
-            });
+          if (requests.every(({ params }) => !params.query && !params.filters && (!params.facets || params.facets.length === 0))) {
+             // Allow initial load for facets if needed, but generally block empty query
           }
 
           // 2. Check Cache (saves quota on back/refresh)
@@ -214,7 +215,6 @@
 
         useEffect(() => {
           if (query !== inputValue && query !== undefined) {
-            // If query comes back with quotes from exact search, strip them for display
             let cleanQuery = query;
             if (query.startsWith('"') && query.endsWith('"')) {
                 cleanQuery = query.slice(1, -1);
@@ -225,16 +225,10 @@
 
         const handleSearch = (currentValue, mode) => {
             if (!currentValue.trim()) return;
-
             let finalQuery = currentValue;
-
             if (mode === 'exact') {
-                // Wrap in quotes for exact phrase match (requires advancedSyntax=true)
                 finalQuery = `"${currentValue.trim()}"`;
             } 
-            // For 'and' and 'normal', Algolia generally defaults to AND logic. 
-            // We send the raw query.
-            
             refine(finalQuery);
         };
 
@@ -272,7 +266,6 @@
                 </button>
             </form>
 
-            {/* Search Mode Toggles */}
             <div className="flex flex-wrap gap-4 text-xs mt-2 px-1 border-b border-slate-200 pb-2 mb-2">
                 <label className={`flex items-center gap-1.5 cursor-pointer select-none p-1 rounded hover:bg-slate-100 transition-colors ${searchMode === 'normal' ? 'text-wiki-link font-bold' : 'text-slate-600'}`}>
                     <input 
@@ -317,14 +310,19 @@
         );
       };
 
-      // --- Filter Component (Tabs Style) ---
       const BookFilter = () => {
         const { items, refine } = useRefinementList({ attribute: 'book_title', sortBy: ['name:asc'] });
+        const { items: currentRefinements } = useCurrentRefinements({ includedAttributes: ['book_title'] });
 
-        // Fallback items if Algolia faceting is not configured for 'book_title'
-        const displayItems = items.length > 0 ? items : [
-            { value: 'البداية والنهاية', label: 'البداية والنهاية', count: null, isRefined: false },
-            { value: 'التاريخ الكبير', label: 'التاريخ الكبير', count: null, isRefined: false }
+        // Check which book is currently selected
+        const selectedBook = currentRefinements.length > 0 
+            ? currentRefinements[0].refinements[0].value 
+            : null;
+
+        // Hardcoded books to ensure they appear even if search result is empty
+        const books = [
+            { value: 'البداية والنهاية', label: 'البداية والنهاية' },
+            { value: 'التاريخ الكبير', label: 'التاريخ الكبير' }
         ];
 
         return (
@@ -334,67 +332,163 @@
               <span>اختر الكتاب للبحث فيه:</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {displayItems.map((item) => (
-                <button
-                  key={item.value}
-                  onClick={() => refine(item.value)}
-                  className={`
-                    px-4 py-2 rounded-md border text-sm font-bold transition-all flex items-center gap-2
-                    ${item.isRefined 
-                      ? 'bg-wiki-link text-white border-wiki-link shadow-md transform scale-105' 
-                      : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 hover:border-wiki-link'}
-                  `}
-                >
-                  {item.isRefined ? <CheckCircle2 className="w-4 h-4" /> : <BookOpen className="w-4 h-4 opacity-50" />}
-                  <span>{item.label}</span>
-                  {item.count !== null && (
-                      <span className={`text-xs ml-1 opacity-80 ${item.isRefined ? 'text-blue-100' : 'text-slate-400'}`}>
-                        ({item.count})
-                      </span>
-                  )}
-                </button>
-              ))}
+              {books.map((book) => {
+                const isSelected = selectedBook === book.value;
+                return (
+                    <button
+                    key={book.value}
+                    onClick={() => refine(book.value)}
+                    className={`
+                        px-4 py-2 rounded-md border text-sm font-bold transition-all flex items-center gap-2
+                        ${isSelected 
+                        ? 'bg-wiki-link text-white border-wiki-link shadow-md transform scale-105' 
+                        : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 hover:border-wiki-link'}
+                    `}
+                    >
+                    {isSelected ? <CheckCircle2 className="w-4 h-4" /> : <BookOpen className="w-4 h-4 opacity-50" />}
+                    <span>{book.label}</span>
+                    </button>
+                );
+              })}
             </div>
           </div>
         );
       };
 
-      // --- Reader Component (The Detail View) ---
+      // --- Reader Component (Revised for Reliable Navigation) ---
 
-      const ReaderView = ({ hit, onClose, onNext, onPrev, hasNext, hasPrev }) => {
+      const ReaderView = ({ initialHit, onClose }) => {
         const [fontSize, setFontSize] = useState(24);
+        const [currentHit, setCurrentHit] = useState(initialHit);
+        const [loading, setLoading] = useState(false);
+        const contentRef = useRef(null);
 
-        // Process text to improve readability: new line after comma or dot
+        // Sync initial hit
+        useEffect(() => {
+            console.log("Reader loaded with hit:", initialHit);
+            setCurrentHit(initialHit);
+        }, [initialHit]);
+
+        const fetchAdjacentPage = async (direction) => {
+            console.log(`Attempting to fetch ${direction} page...`);
+            if (loading) return;
+            setLoading(true);
+            
+            try {
+                // Validate data availability
+                if (!currentHit || !currentHit.book_title || currentHit.part_number === undefined || currentHit.page_number === undefined) {
+                    throw new Error("بيانات الصفحة الحالية غير مكتملة، لا يمكن الانتقال.");
+                }
+
+                // Parse integers to ensure accurate math
+                const currentPart = parseInt(currentHit.part_number, 10);
+                const currentPage = parseInt(currentHit.page_number, 10);
+                const bookTitle = currentHit.book_title;
+
+                if (isNaN(currentPart) || isNaN(currentPage)) {
+                     throw new Error("أرقام الصفحات غير صالحة.");
+                }
+
+                let targetPart = currentPart;
+                let targetPage = direction === 'next' ? currentPage + 1 : currentPage - 1;
+
+                // Check start of book
+                if (targetPage < 1) {
+                     if (direction === 'prev') {
+                         alert("هذه هي بداية الجزء الحالي.");
+                     }
+                     setLoading(false);
+                     return;
+                }
+
+                // Function to perform the precise lookup
+                const findPage = async (pPart, pPage) => {
+                    console.log(`Searching for: Book="${bookTitle}", Part=${pPart}, Page=${pPage}`);
+                    
+                    // IMPORTANT: We try to be robust.
+                    // Note: For this to work, part_number and page_number MUST be in 'attributesForFaceting' in Algolia Dashboard.
+                    
+                    const response = await algoliaClient.search([{
+                        indexName: INDEX_NAME,
+                        params: {
+                            query: '',
+                            // Use strict filtering
+                            filters: `book_title:"${bookTitle}" AND part_number=${pPart} AND page_number=${pPage}`,
+                            hitsPerPage: 1,
+                            // Explicitly request attributes to ensure next navigation works
+                            attributesToRetrieve: ['*']
+                        }
+                    }]);
+                    
+                    return response.results[0].hits[0] || null;
+                };
+
+                // Attempt 1: Fetch target page in current part
+                let nextHit = await findPage(targetPart, targetPage);
+
+                // Attempt 2: If 'next' failed (maybe end of part), try Part + 1, Page 1
+                if (!nextHit && direction === 'next') {
+                    const nextPart = currentPart + 1;
+                    console.log(`End of part ${currentPart}? Checking part ${nextPart} page 1...`);
+                    nextHit = await findPage(nextPart, 1);
+                }
+
+                // Attempt 3 (Reverse): If 'prev' failed (maybe start of part), try Part - 1, Last Page? 
+                // Finding the "Last Page" of previous part via Algolia is hard without a specific query. 
+                // We will skip reverse-part jumping for now unless we query specifically.
+
+                if (nextHit) {
+                    console.log("Page found:", nextHit.objectID);
+                    setCurrentHit(nextHit);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    if (direction === 'next') {
+                        alert(`لم يتم العثور على الصفحة التالية (${targetPage}). قد تكون وصلت لنهاية الكتاب.`);
+                    } else {
+                        alert(`لم يتم العثور على الصفحة السابقة (${targetPage}).`);
+                    }
+                }
+
+            } catch (error) {
+                console.error("Navigation Error Full:", error);
+                
+                // Check for specific Algolia Facet error
+                if (error.message && error.message.includes('filter')) {
+                    alert("خطأ في إعدادات البحث: يرجى التأكد من إضافة 'part_number' و 'page_number' إلى Attributes for Faceting في لوحة تحكم Algolia.");
+                } else {
+                    alert(`حدث خطأ: ${error.message || "غير معروف"}`);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        // Prepare text display
         const formattedText = useMemo(() => {
-            if (!hit || !hit.text_content) return null;
-            
-            // Regex: Replace (.) or (،) with the char + delimiter, then split
-            const parts = hit.text_content.replace(/([.،])/g, '$1###SPLIT###').split('###SPLIT###');
-            
-            return parts.map((part, index) => {
-                const cleanPart = part.trim();
-                if (!cleanPart) return null;
-                return (
-                    <p key={index} className="mb-4 text-justify leading-relaxed">
-                        {cleanPart}
-                    </p>
-                );
-            });
-        }, [hit]);
+            if (!currentHit || !currentHit.text_content) return null;
+            return (
+                <div className="text-justify leading-relaxed whitespace-pre-wrap">
+                    {currentHit.text_content}
+                </div>
+            );
+        }, [currentHit]);
 
-        if (!hit) return null;
+        if (!currentHit) return null;
+
+        // Calculate next page number for the button label safely
+        const nextPageNum = parseInt(currentHit.page_number, 10) + 1;
 
         return (
-          <div className="bg-white border border-wiki-border rounded-sm shadow-sm min-h-[600px] flex flex-col animate-fade-in w-full">
+          <div className="bg-white border border-wiki-border rounded-sm shadow-sm min-h-[600px] flex flex-col animate-fade-in w-full relative">
             {/* Reader Toolbar */}
-            <div className="sticky top-0 z-10 bg-[#f8f9fa] border-b border-wiki-border p-2 flex items-center justify-between select-none shadow-sm">
+            <div className="sticky top-0 z-20 bg-[#f8f9fa] border-b border-wiki-border p-2 flex items-center justify-between select-none shadow-sm">
               <div className="flex items-center gap-2">
                  <button 
                    onClick={onClose}
                    className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-300 rounded hover:bg-slate-50 text-slate-700 text-sm font-bold"
                  >
                    <ArrowRight className="w-4 h-4" />
-                   <span>عودة للنتائج</span>
+                   <span>عودة للبحث</span>
                  </button>
               </div>
               
@@ -408,48 +502,82 @@
                  </button>
               </div>
 
+              {/* Book Navigation */}
               <div className="flex items-center gap-1">
                 <button 
-                  onClick={onPrev} 
-                  disabled={!hasPrev}
-                  className={`p-1.5 rounded border ${!hasPrev ? 'opacity-50 cursor-not-allowed border-transparent' : 'bg-white border-slate-300 hover:bg-slate-50 text-wiki-link'}`}
-                  title="النتيجة السابقة"
+                  onClick={() => fetchAdjacentPage('prev')} 
+                  disabled={loading}
+                  className="flex items-center gap-1 px-2 py-1.5 bg-white border border-slate-300 rounded hover:bg-slate-50 text-wiki-link disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                  title="الصفحة السابقة"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                   <ChevronRight className="w-4 h-4" />
+                   <span className="hidden md:inline text-xs font-bold">السابقة</span>
                 </button>
+                
+                {loading && <div className="loader mx-2 border-wiki-link"></div>}
+
                 <button 
-                  onClick={onNext} 
-                  disabled={!hasNext}
-                  className={`p-1.5 rounded border ${!hasNext ? 'opacity-50 cursor-not-allowed border-transparent' : 'bg-white border-slate-300 hover:bg-slate-50 text-wiki-link'}`}
-                   title="النتيجة التالية"
+                  onClick={() => fetchAdjacentPage('next')} 
+                  disabled={loading}
+                  className="flex items-center gap-1 px-2 py-1.5 bg-white border border-slate-300 rounded hover:bg-slate-50 text-wiki-link disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                   title="الصفحة التالية"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <span className="hidden md:inline text-xs font-bold">التالية</span>
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
             {/* Reader Content */}
-            <div className="flex-grow overflow-y-auto bg-paper-bg">
+            <div className="flex-grow overflow-y-auto bg-paper-bg" ref={contentRef}>
                 <div className="p-6 md:p-12 max-w-4xl mx-auto w-full">
-                  <div className="border-b border-paper-border pb-4 mb-8">
-                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-wiki-text mb-3 leading-tight text-center text-[#4a4a4a]">{hit.book_title}</h2>
-                    <div className="flex items-center justify-center gap-3 text-sm text-slate-500 font-mono">
-                      <span className="bg-white border border-paper-border px-3 py-1 rounded-full text-slate-700">جزء {hit.part_number}</span>
-                      <span className="bg-white border border-paper-border px-3 py-1 rounded-full text-slate-700">صفحة {hit.page_number}</span>
-                      {hit.is_split && <span className="text-red-500 text-xs font-bold">(تابع)</span>}
+                  <div className="border-b border-paper-border pb-4 mb-8 text-center md:text-right">
+                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-wiki-text mb-3 leading-tight text-[#4a4a4a]">{currentHit.book_title}</h2>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 font-mono justify-center md:justify-start">
+                      <span className="bg-white border border-paper-border px-3 py-1 rounded-full text-slate-700 shadow-sm">جزء {currentHit.part_number}</span>
+                      <span className="bg-white border border-paper-border px-3 py-1 rounded-full text-slate-700 shadow-sm">صفحة {currentHit.page_number}</span>
                     </div>
                   </div>
 
+                  {/* Error Boundary/Loading State within content area */}
+                  {loading && (
+                      <div className="absolute inset-0 bg-white/80 z-10 flex flex-col items-center justify-center">
+                          <div className="loader w-12 h-12 border-4 border-blue-500"></div>
+                          <p className="text-slate-600 mt-4 font-bold animate-pulse">جاري تحميل الصفحة التالية...</p>
+                      </div>
+                  )}
+
                   <div 
-                    className="font-serif text-wiki-text"
+                    className="font-serif text-wiki-text transition-opacity duration-200"
                     style={{ fontSize: `${fontSize}px`, lineHeight: '2.3' }}
                   >
                     {formattedText}
                   </div>
                 </div>
                 
-                <div className="bg-[#f4f1ea] p-6 text-center text-sm text-slate-500 border-t border-paper-border mt-8">
-                   نهاية النص المعروض لهذه النتيجة. استخدم أزرار التنقل أعلاه للانتقال للنتيجة التالية.
+                {/* Bottom Navigation for Continuity */}
+                <div className="bg-[#f4f1ea] p-8 text-center border-t border-paper-border mt-8">
+                   <button 
+                      onClick={(e) => {
+                          e.preventDefault();
+                          fetchAdjacentPage('next');
+                      }}
+                      disabled={loading}
+                      type="button"
+                      className="group w-full md:w-auto px-8 py-4 bg-white border border-slate-300 rounded shadow-sm text-wiki-link font-bold text-lg hover:bg-slate-50 hover:shadow-md transition-all flex items-center justify-center gap-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 cursor-pointer relative z-10"
+                   >
+                      <span>
+                          {loading ? 'جاري الانتقال...' : 'اقرأ الصفحة التالية'}
+                      </span>
+                      {!loading && <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />}
+                   </button>
+                   
+                   <p className="text-xs text-slate-400 mt-3 font-mono">
+                       {!isNaN(nextPageNum) 
+                         ? `اضغط للانتقال إلى الصفحة رقم ${nextPageNum}`
+                         : 'اضغط للانتقال للصفحة التالية'
+                       }
+                   </p>
                 </div>
             </div>
           </div>
@@ -479,8 +607,6 @@
                     <BookOpen className="w-3 h-3" />
                     قراءة النص كاملاً
                  </button>
-                 <span>-</span>
-                 <span>{hit.part_sequence || 0} كلمة</span>
               </div>
             </div>
           </article>
@@ -489,41 +615,26 @@
 
       const AppContent = () => {
         const { hits, results } = useHits();
-        const [readingIndex, setReadingIndex] = useState(null); // Index within the hits array
+        const [selectedHit, setSelectedHit] = useState(null); 
 
         const hasSearched = results && results.query && results.query.length > 0;
 
         // Handle entering reader mode
-        const handleRead = (index) => {
-          setReadingIndex(index);
+        const handleRead = (hit) => {
+          setSelectedHit(hit);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // Handle exiting reader mode (Preserves search state because we just hide the div)
+        // Handle exiting reader mode
         const handleCloseReader = () => {
-          setReadingIndex(null);
-        };
-
-        // Reader Navigation
-        const handleNext = () => {
-          if (readingIndex !== null && readingIndex < hits.length - 1) {
-            setReadingIndex(readingIndex + 1);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        };
-
-        const handlePrev = () => {
-          if (readingIndex !== null && readingIndex > 0) {
-            setReadingIndex(readingIndex - 1);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
+          setSelectedHit(null);
         };
 
         return (
           <div className="min-h-[500px]">
             
             {/* SEARCH VIEW: Hidden via CSS when reading to preserve state */}
-            <div className={readingIndex !== null ? 'hidden' : 'block'}>
+            <div className={selectedHit !== null ? 'hidden' : 'block'}>
               
               <div className="bg-slate-50 p-4 border border-wiki-border mb-6 rounded-sm">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
@@ -551,8 +662,8 @@
                 </div>
               ) : (
                 <div className="flex flex-col pt-2">
-                  {hits.map((hit, index) => (
-                    <HitCard key={hit.objectID} hit={hit} onClick={() => handleRead(index)} />
+                  {hits.map((hit) => (
+                    <HitCard key={hit.objectID} hit={hit} onClick={() => handleRead(hit)} />
                   ))}
                 </div>
               )}
@@ -563,14 +674,10 @@
             </div>
 
             {/* READER VIEW: Shown when reading */}
-            {readingIndex !== null && hits[readingIndex] && (
+            {selectedHit !== null && (
               <ReaderView 
-                hit={hits[readingIndex]}
+                initialHit={selectedHit}
                 onClose={handleCloseReader}
-                onNext={handleNext}
-                onPrev={handlePrev}
-                hasNext={readingIndex < hits.length - 1}
-                hasPrev={readingIndex > 0}
               />
             )}
           </div>
@@ -664,7 +771,7 @@
                 <div className="flex justify-center gap-4 text-wiki-link">
                    <span className="cursor-pointer hover:underline">سياسة الخصوصية</span>
                    <span className="cursor-pointer hover:underline">حول الموسوعة</span>
-                   <span className="cursor-pointer hover:underline">إخلاء مسؤولية</span>
+                   <span className="cursor-pointer hover:underline">إخلاء المسؤولية</span>
                    <span className="cursor-pointer hover:underline">نسخة للأجهزة المحمولة</span>
                 </div>
               </div>
