@@ -27,8 +27,8 @@
             colors: {
               'wiki-bg': '#f8f9fa',
               'wiki-border': '#a2a9b1',
-              'wiki-link': '#3366cc',
-              'wiki-link-visited': '#795cb2',
+              'wiki-link': '#0645ad',
+              'wiki-link-visited': '#0b0080',
               'wiki-text': '#202122',
               'wiki-panel': '#ffffff',
               'paper-bg': '#fffbf2',
@@ -43,7 +43,7 @@
         background-color: #f8f9fa;
         color: #202122;
       }
-      /* Algolia Highlighting Styles */
+      /* Algolia Highlighting Styles - Match Screenshot (Yellow background) */
       .ais-Highlight-highlighted, .ais-Snippet-highlighted {
         background-color: #FCE588;
         color: #202122;
@@ -245,7 +245,7 @@
         };
 
         return (
-          <div className="w-full max-w-xl">
+          <div className="w-full max-w-2xl">
             <form onSubmit={handleSubmit} className="flex gap-1 mb-2">
                 <div className="relative flex-grow">
                 <input
@@ -254,19 +254,19 @@
                     value={inputValue}
                     onChange={(e) => setInputValue(e.currentTarget.value)}
                     placeholder="ابحث في الموسوعة..."
-                    className="w-full h-9 px-3 text-sm bg-white border border-wiki-border focus:border-wiki-link focus:ring-1 focus:ring-wiki-link outline-none font-sans placeholder-slate-400"
+                    className="w-full h-10 px-4 text-base bg-white border border-wiki-border focus:border-wiki-link focus:ring-1 focus:ring-wiki-link outline-none font-sans placeholder-slate-400"
                 />
                 </div>
                 <button
                 type="submit"
-                className="px-6 h-9 bg-wiki-bg border border-wiki-border text-wiki-text text-sm font-bold hover:bg-slate-200 transition-colors flex items-center gap-2"
+                className="px-6 h-10 bg-wiki-bg border border-wiki-border text-wiki-text text-sm font-bold hover:bg-slate-200 transition-colors flex items-center gap-2"
                 >
-                <Search className="w-3 h-3" />
+                <Search className="w-4 h-4" />
                 <span>بحث</span>
                 </button>
             </form>
 
-            <div className="flex flex-wrap gap-4 text-xs mt-2 px-1 border-b border-slate-200 pb-2 mb-2">
+            <div className="flex flex-wrap gap-4 text-xs mt-2 px-1 pb-2 mb-2">
                 <label className={`flex items-center gap-1.5 cursor-pointer select-none p-1 rounded hover:bg-slate-100 transition-colors ${searchMode === 'normal' ? 'text-wiki-link font-bold' : 'text-slate-600'}`}>
                     <input 
                         type="radio" 
@@ -310,43 +310,42 @@
         );
       };
 
+      // --- REVISED BOOK FILTER (MATCHING SCREENSHOT) ---
       const BookFilter = () => {
-        const { items, refine } = useRefinementList({ attribute: 'book_title', sortBy: ['name:asc'] });
-        const { items: currentRefinements } = useCurrentRefinements({ includedAttributes: ['book_title'] });
-
-        // Check which book is currently selected
-        const selectedBook = currentRefinements.length > 0 
-            ? currentRefinements[0].refinements[0].value 
-            : null;
-
-        // Hardcoded books to ensure they appear even if search result is empty
-        const books = [
-            { value: 'البداية والنهاية', label: 'البداية والنهاية' },
-            { value: 'التاريخ الكبير', label: 'التاريخ الكبير' }
-        ];
+        // Use dynamic facets from Algolia
+        const { items, refine } = useRefinementList({ 
+            attribute: 'book_title', 
+            sortBy: ['count:desc', 'name:asc'],
+            limit: 20 // Ensure we get a good list of books
+        });
 
         return (
-          <div className="mt-2">
-            <div className="flex items-center gap-2 mb-2 text-xs font-bold text-slate-500">
-              <Library className="w-3 h-3" />
+          <div className="mt-2 mb-4">
+            <div className="flex items-center justify-end gap-2 mb-2 text-xs text-slate-500">
               <span>اختر الكتاب للبحث فيه:</span>
+              <Library className="w-3 h-3" />
             </div>
-            <div className="flex flex-wrap gap-2">
-              {books.map((book) => {
-                const isSelected = selectedBook === book.value;
+            <div className="flex flex-wrap justify-end gap-3">
+              {items.map((item) => {
                 return (
                     <button
-                    key={book.value}
-                    onClick={() => refine(book.value)}
+                    key={item.value}
+                    onClick={() => refine(item.value)}
                     className={`
-                        px-4 py-2 rounded-md border text-sm font-bold transition-all flex items-center gap-2
-                        ${isSelected 
-                        ? 'bg-wiki-link text-white border-wiki-link shadow-md transform scale-105' 
-                        : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50 hover:border-wiki-link'}
+                        group flex items-center gap-3 px-3 py-2 rounded border transition-all
+                        ${item.isRefined 
+                        ? 'bg-white border-wiki-link ring-1 ring-wiki-link shadow-sm' 
+                        : 'bg-white border-slate-300 hover:border-slate-400 hover:bg-slate-50'}
                     `}
                     >
-                    {isSelected ? <CheckCircle2 className="w-4 h-4" /> : <BookOpen className="w-4 h-4 opacity-50" />}
-                    <span>{book.label}</span>
+                     {/* Count on the left (LTR) or Right (RTL) depending on flow. Screenshot shows (Number) Title [Icon] */}
+                     <span className="text-xs font-bold text-slate-400 font-mono">({item.count})</span>
+                     
+                     <span className={`text-sm font-serif ${item.isRefined ? 'text-wiki-link font-bold' : 'text-slate-700'}`}>
+                        {item.label}
+                     </span>
+                     
+                     <BookOpen className={`w-4 h-4 ${item.isRefined ? 'text-wiki-link' : 'text-slate-300'}`} />
                     </button>
                 );
               })}
@@ -405,9 +404,6 @@
                 const findPage = async (pPart, pPage) => {
                     console.log(`Searching for: Book="${bookTitle}", Part=${pPart}, Page=${pPage}`);
                     
-                    // IMPORTANT: We try to be robust.
-                    // Note: For this to work, part_number and page_number MUST be in 'attributesForFaceting' in Algolia Dashboard.
-                    
                     const response = await algoliaClient.search([{
                         indexName: INDEX_NAME,
                         params: {
@@ -415,7 +411,6 @@
                             // Use strict filtering
                             filters: `book_title:"${bookTitle}" AND part_number=${pPart} AND page_number=${pPage}`,
                             hitsPerPage: 1,
-                            // Explicitly request attributes to ensure next navigation works
                             attributesToRetrieve: ['*']
                         }
                     }]);
@@ -433,10 +428,6 @@
                     nextHit = await findPage(nextPart, 1);
                 }
 
-                // Attempt 3 (Reverse): If 'prev' failed (maybe start of part), try Part - 1, Last Page? 
-                // Finding the "Last Page" of previous part via Algolia is hard without a specific query. 
-                // We will skip reverse-part jumping for now unless we query specifically.
-
                 if (nextHit) {
                     console.log("Page found:", nextHit.objectID);
                     setCurrentHit(nextHit);
@@ -451,8 +442,6 @@
 
             } catch (error) {
                 console.error("Navigation Error Full:", error);
-                
-                // Check for specific Algolia Facet error
                 if (error.message && error.message.includes('filter')) {
                     alert("خطأ في إعدادات البحث: يرجى التأكد من إضافة 'part_number' و 'page_number' إلى Attributes for Faceting في لوحة تحكم Algolia.");
                 } else {
@@ -475,7 +464,6 @@
 
         if (!currentHit) return null;
 
-        // Calculate next page number for the button label safely
         const nextPageNum = parseInt(currentHit.page_number, 10) + 1;
 
         return (
@@ -588,26 +576,28 @@
       
       const HitCard = ({ hit, onClick }) => {
         return (
-          <article className="mb-6 last:mb-0 pb-4 border-b border-gray-100 last:border-0">
-            <div className="flex items-baseline gap-2 mb-1">
-              <h3 className="text-lg font-serif font-medium truncate">
-                <button onClick={onClick} className="text-wiki-link hover:underline hover:text-wiki-link-visited decoration-1 text-right">
+          <article className="mb-6 last:mb-0 pb-2">
+            {/* Hit Header - Matching Screenshot Style (Blue link, gray metadata) */}
+            <div className="flex items-center gap-2 mb-1 justify-end flex-row-reverse">
+               <span className="text-xs text-slate-500 dir-ltr font-sans">
+                 (ج {hit.part_number}, ص {hit.page_number})
+              </span>
+              <h3 className="text-lg font-serif font-medium truncate text-right">
+                <button onClick={onClick} className="text-wiki-link hover:underline decoration-1">
                    <Highlight attribute="book_title" hit={hit} />
                 </button>
               </h3>
-              <span className="text-xs text-slate-500 flex-shrink-0">
-                 (ج {hit.part_number}، ص {hit.page_number})
-              </span>
             </div>
             
-            <div className="text-sm text-wiki-text leading-relaxed font-serif">
+            {/* Hit Content - Justified text with yellow highlights */}
+            <div className="text-sm text-wiki-text leading-7 font-serif text-justify pl-4">
               <Snippet attribute="text_content" hit={hit} />
-              <div className="text-xs text-slate-400 mt-2 flex gap-2">
-                 <button onClick={onClick} className="text-wiki-link hover:underline flex items-center gap-1">
-                    <BookOpen className="w-3 h-3" />
-                    قراءة النص كاملاً
-                 </button>
-              </div>
+            </div>
+            
+            {/* Context/Additional Actions */}
+             <div className="text-xs text-slate-400 mt-1 flex gap-2">
+                 {/* Hidden to match screenshot cleanliness, enable if needed */}
+                 {/* <span className="text-wiki-link cursor-pointer">عرض السياق</span> */}
             </div>
           </article>
         );
@@ -619,13 +609,11 @@
 
         const hasSearched = results && results.query && results.query.length > 0;
 
-        // Handle entering reader mode
         const handleRead = (hit) => {
           setSelectedHit(hit);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // Handle exiting reader mode
         const handleCloseReader = () => {
           setSelectedHit(null);
         };
@@ -633,15 +621,15 @@
         return (
           <div className="min-h-[500px]">
             
-            {/* SEARCH VIEW: Hidden via CSS when reading to preserve state */}
+            {/* SEARCH VIEW */}
             <div className={selectedHit !== null ? 'hidden' : 'block'}>
               
               <div className="bg-slate-50 p-4 border border-wiki-border mb-6 rounded-sm">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                     <CustomSearchBox />
-                    <Stats />
+                    {hasSearched && <Stats />}
                   </div>
-                  {/* Filter Section */}
+                  {/* Filter Section - Now Dynamic */}
                   <BookFilter />
               </div>
 
@@ -656,24 +644,25 @@
                   <ul className="list-disc list-inside text-sm space-y-1">
                      <li>تحقق من الإملاء.</li>
                      <li>جرب كلمات مفتاحية مختلفة.</li>
-                     <li>حاول تغيير نمط البحث (بحث مطابق أو شامل).</li>
                      <li>تأكد من اختيار الكتاب الصحيح.</li>
                   </ul>
                 </div>
               ) : (
-                <div className="flex flex-col pt-2">
+                <div className="flex flex-col pt-2 space-y-2">
                   {hits.map((hit) => (
                     <HitCard key={hit.objectID} hit={hit} onClick={() => handleRead(hit)} />
                   ))}
                 </div>
               )}
               
-              <div className="mt-6 border-t border-gray-200 pt-4">
-                 <CustomPagination />
-              </div>
+              {hasSearched && (
+                  <div className="mt-6 border-t border-gray-200 pt-4">
+                     <CustomPagination />
+                  </div>
+              )}
             </div>
 
-            {/* READER VIEW: Shown when reading */}
+            {/* READER VIEW */}
             {selectedHit !== null && (
               <ReaderView 
                 initialHit={selectedHit}
@@ -758,6 +747,7 @@
                         snippetEllipsisText="..."
                         advancedSyntax={true}
                         facets={['book_title']}
+                        maxValuesPerFacet={20}
                       />
                       <AppContent />
                     </InstantSearch>
