@@ -122,7 +122,7 @@
       } from 'react-instantsearch';
       import { 
         Search, Menu, Globe, X, ChevronLeft, ChevronRight, 
-        BookOpen, ArrowRight, ZoomIn, ZoomOut, Type, Filter, CheckCircle2, Quote, Plus, Library, ArrowDown, AlertTriangle 
+        BookOpen, ArrowRight, ZoomIn, ZoomOut, Type, Filter, CheckCircle2, Quote, Plus, Library, ArrowDown, AlertTriangle, Sparkles, SpellCheck 
       } from 'lucide-react';
 
       // --- Algolia Client Setup with CACHING ---
@@ -210,25 +210,40 @@
       const CustomSearchBox = () => {
         const { query, refine } = useSearchBox();
         const [inputValue, setInputValue] = useState(query || '');
-        const [searchMode, setSearchMode] = useState('normal'); // 'normal' | 'exact' | 'and'
+        const [searchMode, setSearchMode] = useState('best'); // 'best' | 'and' | 'phrase' | 'fuzzy'
         const inputRef = useRef(null);
 
         useEffect(() => {
           if (query !== inputValue && query !== undefined) {
             let cleanQuery = query;
-            if (query.startsWith('"') && query.endsWith('"')) {
-                cleanQuery = query.slice(1, -1);
-            }
-            setInputValue(cleanQuery);
+            // Strip advanced syntax for display if needed, but usually best to show what's searched
+            // Just removing quotes for exact match display could be nice but might confuse input
+            setInputValue(cleanQuery.replace(/["]/g, '').replace(/\+/g, ' '));
           }
         }, [query]);
 
-        const handleSearch = (currentValue, mode) => {
-            if (!currentValue.trim()) return;
-            let finalQuery = currentValue;
-            if (mode === 'exact') {
-                finalQuery = `"${currentValue.trim()}"`;
-            } 
+        const buildQuery = (val, mode) => {
+            const cleanVal = val.trim();
+            if (!cleanVal) return '';
+            
+            switch (mode) {
+                case 'phrase':
+                    return `"${cleanVal}"`;
+                case 'and':
+                    // Using advanced syntax '+' for AND
+                    return cleanVal.split(/\s+/).map(w => `+${w}`).join(' ');
+                case 'fuzzy':
+                    // Algolia is fuzzy by default, but we treat this as standard search visually
+                    return cleanVal;
+                case 'best':
+                default:
+                     // Standard Algolia search (Best Fields)
+                    return cleanVal;
+            }
+        };
+
+        const handleSearch = (val, mode) => {
+            const finalQuery = buildQuery(val, mode);
             refine(finalQuery);
         };
 
@@ -245,7 +260,7 @@
         };
 
         return (
-          <div className="w-full max-w-2xl">
+          <div className="w-full max-w-3xl">
             <form onSubmit={handleSubmit} className="flex gap-1 mb-2">
                 <div className="relative flex-grow">
                 <input
@@ -266,44 +281,58 @@
                 </button>
             </form>
 
-            <div className="flex flex-wrap gap-4 text-xs mt-2 px-1 pb-2 mb-2">
-                <label className={`flex items-center gap-1.5 cursor-pointer select-none p-1 rounded hover:bg-slate-100 transition-colors ${searchMode === 'normal' ? 'text-wiki-link font-bold' : 'text-slate-600'}`}>
+            {/* Advanced Search Modes */}
+            <div className="flex flex-wrap gap-3 text-xs mt-3 px-1 pb-2 mb-2 bg-slate-100/50 p-2 rounded border border-slate-200/50">
+                {/* 1. Best Fields */}
+                <label className={`flex items-center gap-1.5 cursor-pointer select-none px-2 py-1 rounded transition-all ${searchMode === 'best' ? 'bg-white shadow-sm text-wiki-link font-bold ring-1 ring-wiki-link/20' : 'text-slate-600 hover:bg-slate-100'}`}>
                     <input 
                         type="radio" 
                         name="searchMode" 
-                        className="accent-wiki-link"
-                        checked={searchMode === 'normal'} 
-                        onChange={() => handleModeChange('normal')} 
+                        className="hidden"
+                        checked={searchMode === 'best'} 
+                        onChange={() => handleModeChange('best')} 
                     />
+                    <Sparkles className="w-3.5 h-3.5" />
                     <span>بحث عام (ذكي)</span>
                 </label>
 
-                <label className={`flex items-center gap-1.5 cursor-pointer select-none p-1 rounded hover:bg-slate-100 transition-colors ${searchMode === 'exact' ? 'text-wiki-link font-bold' : 'text-slate-600'}`}>
+                {/* 2. All Words (AND) */}
+                <label className={`flex items-center gap-1.5 cursor-pointer select-none px-2 py-1 rounded transition-all ${searchMode === 'and' ? 'bg-white shadow-sm text-wiki-link font-bold ring-1 ring-wiki-link/20' : 'text-slate-600 hover:bg-slate-100'}`}>
                     <input 
                         type="radio" 
                         name="searchMode" 
-                        className="accent-wiki-link"
-                        checked={searchMode === 'exact'} 
-                        onChange={() => handleModeChange('exact')} 
-                    />
-                    <div className="flex items-center gap-1">
-                        <Quote className="w-3 h-3" />
-                        <span>مطابق للعبارة (" ")</span>
-                    </div>
-                </label>
-
-                <label className={`flex items-center gap-1.5 cursor-pointer select-none p-1 rounded hover:bg-slate-100 transition-colors ${searchMode === 'and' ? 'text-wiki-link font-bold' : 'text-slate-600'}`}>
-                    <input 
-                        type="radio" 
-                        name="searchMode" 
-                        className="accent-wiki-link"
+                        className="hidden"
                         checked={searchMode === 'and'} 
                         onChange={() => handleModeChange('and')} 
                     />
-                    <div className="flex items-center gap-1">
-                        <Plus className="w-3 h-3" />
-                        <span>يحتوي كل الكلمات</span>
-                    </div>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>شامل (يحتوي كل الكلمات)</span>
+                </label>
+
+                {/* 3. Exact Phrase */}
+                <label className={`flex items-center gap-1.5 cursor-pointer select-none px-2 py-1 rounded transition-all ${searchMode === 'phrase' ? 'bg-white shadow-sm text-wiki-link font-bold ring-1 ring-wiki-link/20' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <input 
+                        type="radio" 
+                        name="searchMode" 
+                        className="hidden"
+                        checked={searchMode === 'phrase'} 
+                        onChange={() => handleModeChange('phrase')} 
+                    />
+                    <Quote className="w-3.5 h-3.5" />
+                    <span>عبارة دقيقة (" ")</span>
+                </label>
+
+                {/* 4. Fuzzy */}
+                <label className={`flex items-center gap-1.5 cursor-pointer select-none px-2 py-1 rounded transition-all ${searchMode === 'fuzzy' ? 'bg-white shadow-sm text-wiki-link font-bold ring-1 ring-wiki-link/20' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <input 
+                        type="radio" 
+                        name="searchMode" 
+                        className="hidden"
+                        checked={searchMode === 'fuzzy'} 
+                        onChange={() => handleModeChange('fuzzy')} 
+                    />
+                    <SpellCheck className="w-3.5 h-3.5" />
+                    <span>بحث مرن (أخطاء إملائية)</span>
                 </label>
             </div>
           </div>
@@ -452,12 +481,34 @@
             }
         };
 
-        // Prepare text display
+        // Prepare text display with Formatting Logic (|| or . = New Line)
         const formattedText = useMemo(() => {
             if (!currentHit || !currentHit.text_content) return null;
+
+            const rawText = currentHit.text_content;
+            
+            // Process Text:
+            // 1. Replace double pipes (||) with a newline marker.
+            // 2. Replace dots (.) with dot + newline marker, but keep the dot.
+            // 3. Split by the marker to create lines.
+            
+            const lines = rawText
+                .replace(/\|\|/g, '\n') // Handle explicit separators
+                .replace(/\.(?=\s|$)/g, '.\n') // Handle dots followed by space or end of string
+                .split('\n');
+
             return (
-                <div className="text-justify leading-relaxed whitespace-pre-wrap">
-                    {currentHit.text_content}
+                <div className="text-justify">
+                    {lines.map((line, index) => {
+                        const trimmedLine = line.trim();
+                        if (!trimmedLine) return null;
+                        
+                        return (
+                            <p key={index} className="mb-4 block">
+                                {trimmedLine}
+                            </p>
+                        );
+                    })}
                 </div>
             );
         }, [currentHit]);
@@ -536,8 +587,8 @@
                   )}
 
                   <div 
-                    className="font-serif text-wiki-text transition-opacity duration-200"
-                    style={{ fontSize: `${fontSize}px`, lineHeight: '2.3' }}
+                    className="font-serif text-wiki-text transition-opacity duration-200 leading-loose"
+                    style={{ fontSize: `${fontSize}px` }}
                   >
                     {formattedText}
                   </div>

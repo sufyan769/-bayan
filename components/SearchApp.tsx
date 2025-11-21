@@ -9,7 +9,7 @@ import { Stats } from './Stats';
 const INDEX_NAME = 'algolia_unified';
 
 interface SearchErrorBoundaryProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 interface SearchErrorBoundaryState {
@@ -18,10 +18,7 @@ interface SearchErrorBoundaryState {
 
 // Error Boundary for Search
 class SearchErrorBoundary extends Component<SearchErrorBoundaryProps, SearchErrorBoundaryState> {
-  constructor(props: SearchErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  state: SearchErrorBoundaryState = { hasError: false };
 
   static getDerivedStateFromError(error: unknown) {
     console.error("Search Error:", error);
