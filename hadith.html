@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>الموسوعة - الحديث الشريف</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Unified Navigation -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i data-lucide="library"></i>
+        <span>الموسوعة الشاملة</span>
+      </a>
+      <div class="nav-links">
+        <a href="hadith.html" class="nav-link active">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          الحديث الشريف
+        </a>
+        <a href="scholars.html" class="nav-link">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          تراجم العلماء
+        </a>
+        <a href="history.html" class="nav-link">
+          <i data-lucide="scroll" class="w-4 h-4"></i>
+          البداية والنهاية
+        </a>
+        <a href="algolia-search.html" class="nav-link">
+          <i data-lucide="book" class="w-4 h-4"></i>
+          موسوعة الفتاوى
+        </a>
+        <a href="firebase-search.html" class="nav-link">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          بحث Firebase
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+
+    <!-- Header -->
+    <header>
+      <div class="flex items-center justify-center gap-3 mb-2">
+        <i data-lucide="book-open-check" class="w-10 h-10 text-[#3498db]"></i>
+        <h1>الحديث الشريف</h1>
+      </div>
+      <div class="subtitle">بحث في السنة النبوية المطهرة</div>
+    </header>
+
+    <!-- Search Section -->
+    <div class="search-container">
+      <form id="searchForm" class="search-input-wrapper">
+        <input id="searchInput" type="text" class="search-input"
+          placeholder="ابحث عن حديث (مثلاً: إنما الأعمال بالنيات)..." autocomplete="off">
+        <button type="submit" class="search-btn">
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden text-center py-8">
+      <div class="w-8 h-8 border-4 border-[#3498db] border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <p class="text-sm text-gray-500 mt-4">جاري البحث...</p>
+    </div>
+
+    <!-- No Results State -->
+    <div id="noResultsState" class="hidden text-center py-8">
+      <p class="text-lg text-gray-600">لم يتم العثور على نتائج مطابقة.</p>
+    </div>
+
+    <!-- Search Results -->
+    <div id="resultsList" class="results-list hidden">
+      <!-- Injected Items -->
+    </div>
+
+    <!-- Footer Stats (Subtle) -->
+    <div class="text-center text-gray-400 text-sm py-10 border-t border-gray-100 mt-10">
+      <p>&copy; 2025 الموسوعة الشاملة. جميع الحقوق محفوظة.</p>
+    </div>
+
+  </div>
+
+  <!-- Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      limit,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBYJ2pVoWJ5ednWOnnF2dOJ43MJvDi_8rw",
+      authDomain: "hadeth-7baf7.firebaseapp.com",
+      projectId: "hadeth-7baf7",
+      storageBucket: "hadeth-7baf7.firebasestorage.app",
+      messagingSenderId: "401684715520",
+      appId: "1:401684715520:web:297abdb6aee1fb3176a0e5",
+      measurementId: "G-LGET278KWQ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Algolia Configuration for Hadith
+    const ALGOLIA_APP_ID = '88G4AVERCC';
+    const ALGOLIA_API_KEY = '76402a5d814264e01fb86ca687d26e30';
+    const ALGOLIA_INDEX_NAME = 'firebase-hadeth';
+
+    const algoliaClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
+    const algoliaIndex = algoliaClient.initIndex(ALGOLIA_INDEX_NAME);
+
+    const CACHE_KEY = 'hadith_search_cache';
+
+    const form = document.getElementById("searchForm");
+    const input = document.getElementById("searchInput");
+    const resultsList = document.getElementById("resultsList");
+    const loadingState = document.getElementById("loadingState");
+    const noResultsState = document.getElementById("noResultsState");
+
+    lucide.createIcons();
+
+    // 1. Initialization
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchCache = sessionStorage.getItem(CACHE_KEY);
+      if (searchCache) {
+        try {
+          const { term, docs, scrollY } = JSON.parse(searchCache);
+          if (term) input.value = term;
+          if (docs && docs.length > 0) {
+            renderSearchResults(docs);
+            if (scrollY) setTimeout(() => window.scrollTo(0, scrollY), 0);
+          }
+        } catch (e) { sessionStorage.removeItem(CACHE_KEY); }
+      }
+    });
+
+    // 2. Search Logic
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const term = input.value.trim();
+      if (!term) return;
+
+      resultsList.classList.add('hidden');
+      resultsList.innerHTML = '';
+      noResultsState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      sessionStorage.removeItem(CACHE_KEY);
+
+      try {
+        const { hits } = await algoliaIndex.search(term, {
+          hitsPerPage: 20
+        });
+
+        if (hits.length === 0) {
+          loadingState.classList.add("hidden");
+          noResultsState.classList.remove("hidden");
+          return;
+        }
+
+        const docs = hits.map(hit => ({
+          ...hit,
+          id: hit.objectID
+        }));
+
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ term, docs, scrollY: 0 }));
+        renderSearchResults(docs);
+
+      } catch (err) {
+        console.error("Algolia Error:", err);
+        loadingState.classList.add("hidden");
+        resultsList.classList.remove("hidden");
+        resultsList.innerHTML = "<p class='text-red-600 text-center'>حدث خطأ أثناء الاتصال بمحرك البحث.</p>";
+      }
+    });
+
+    function renderSearchResults(docs) {
+      loadingState.classList.add("hidden");
+      resultsList.classList.remove("hidden");
+
+      const header = document.createElement('div');
+      header.className = "section-title";
+      header.innerHTML = `<i data-lucide="list" class="w-5 h-5"></i><span>نتائج البحث (${docs.length})</span>`;
+      resultsList.appendChild(header);
+      lucide.createIcons();
+
+      docs.forEach(doc => {
+        const article = document.createElement('article');
+        article.className = "result-item";
+
+        // Highlight logic if available
+        let displayText = doc.text;
+        if (doc._highlightResult && doc._highlightResult.text) {
+          displayText = doc._highlightResult.text.value;
+        }
+
+        // Clean text for snippet
+        const cleanSnippet = displayText.replace(/<[^>]*>?/gm, '').substring(0, 200) + "...";
+
+        let hukmBadge = '';
+        if (doc.hukm) {
+          const h = Array.isArray(doc.hukm) ? doc.hukm[0] : doc.hukm;
+          let color = 'text-gray-500';
+          if (h.includes('صحيح')) color = 'text-green-600 font-bold';
+          if (h.includes('ضعيف')) color = 'text-red-600';
+          hukmBadge = `<span class="${color} text-xs border border-gray-200 px-2 py-1 rounded">${h}</span>`;
+        }
+
+        article.innerHTML = `
+          <div class="result-meta mb-2">
+             ${hukmBadge}
+             ${doc.source ? `<span class="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">${Array.isArray(doc.source) ? doc.source[0] : doc.source}</span>` : ''}
+          </div>
+          <h3 class="result-title">
+            <a href="details_hadith.html?id=${doc.id}">
+              ${cleanSnippet}
+            </a>
+          </h3>
+          <div class="result-meta mt-2">
+             ${doc.rawi ? `<span>الراوي: ${Array.isArray(doc.rawi) ? doc.rawi.join('، ') : doc.rawi}</span>` : ''}
+          </div>
+        `;
+
+        article.querySelector('a').addEventListener('click', () => {
+          const currentCache = sessionStorage.getItem(CACHE_KEY);
+          if (currentCache) {
+            const parsed = JSON.parse(currentCache);
+            parsed.scrollY = window.scrollY;
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify(parsed));
+          }
+        });
+
+        resultsList.appendChild(article);
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -4,13 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>البداية والنهاية - التاريخ الكبير</title>
-
-  <!-- Tailwind CSS (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Babel for JSX -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <title>الموسوعة الشاملة - الرئيسية</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,641 +13,396 @@
     href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
     rel="stylesheet">
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Noto Naskh Arabic"', 'sans-serif'],
-            serif: ['"Amiri"', 'serif'],
-          },
-          colors: {
-            'wiki-bg': '#f8f9fa',
-            'wiki-border': '#a2a9b1',
-            'wiki-link': '#0645ad',
-            'wiki-link-visited': '#0b0080',
-            'wiki-text': '#202122',
-            'wiki-panel': '#ffffff',
-            'paper-bg': '#fffbf2',
-            'paper-border': '#e8e4d9'
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Import Map for React and Algolia -->
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "algoliasearch/lite": "https://esm.sh/algoliasearch@4.22.1/lite",
-    "react-instantsearch": "https://esm.sh/react-instantsearch@7.7.0?external=react,react-dom",
-    "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "algoliasearch/": "https://aistudiocdn.com/algoliasearch@^5.44.0/"
-  }
-}
-</script>
   <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="antialiased">
-  <div id="root"></div>
+<body>
 
-  <script type="text/babel" data-type="module">
-    import React, { useState, useMemo, useEffect, useRef } from 'react';
-    import ReactDOM from 'react-dom/client';
-    import algoliasearch from 'algoliasearch/lite';
-    import {
-      InstantSearch,
-      Configure,
-      useSearchBox,
-      useHits,
-      usePagination,
-      useStats,
-      useRefinementList,
-      useCurrentRefinements,
-      Highlight,
-      Snippet
-    } from 'react-instantsearch';
-    import {
-      Search, Menu, Globe, X, ChevronLeft, ChevronRight,
-      BookOpen, ArrowRight, ZoomIn, ZoomOut, Type, Filter, CheckCircle2, Quote, Plus, Library, ArrowDown, AlertTriangle, Sparkles, SpellCheck
-    } from 'lucide-react';
+  <!-- Unified Navigation -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i data-lucide="library"></i>
+        <span>الموسوعة الشاملة</span>
+      </a>
+      <div class="nav-links">
+        <a href="hadith.html" class="nav-link">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          الحديث الشريف
+        </a>
+        <a href="scholars.html" class="nav-link">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          تراجم العلماء
+        </a>
+        <a href="history.html" class="nav-link">
+          <i data-lucide="scroll" class="w-4 h-4"></i>
+          البداية والنهاية
+        </a>
+        <a href="algolia-search.html" class="nav-link">
+          <i data-lucide="book" class="w-4 h-4"></i>
+          موسوعة الفتاوى
+        </a>
+        <a href="firebase-search.html" class="nav-link">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          بحث Firebase
+        </a>
+      </div>
+    </div>
+  </nav>
 
-    // --- Algolia Client Setup ---
-    const APP_ID = '88G4AVERCC';
-    const API_KEY = '33b0b484f534b2ae2dac948d588345a6';
-    const INDEX_NAME = 'algolia_unified';
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="container-fluid">
+      <h1 class="hero-title">الموسوعة الإسلامية الشاملة</h1>
+      <p class="hero-subtitle">منصة موحدة للبحث في الحديث الشريف، التاريخ الإسلامي، وتراجم العلماء.</p>
 
-    const algoliaClient = algoliasearch(APP_ID, API_KEY);
+      <!-- Unified Search Section -->
+      <div class="search-container">
+        <div class="search-tabs">
+          <button class="search-tab active" data-target="all">الكل</button>
+          <button class="search-tab" data-target="hadith">الحديث</button>
+          <button class="search-tab" data-target="history">التاريخ</button>
+          <button class="search-tab" data-target="scholars">التراجم</button>
+        </div>
 
-    // Simple in-memory cache
-    const requestCache = new Map();
+        <form id="searchForm" class="search-input-wrapper">
+          <button type="submit" class="search-btn">
+            <i data-lucide="search" class="w-6 h-6"></i>
+          </button>
+          <input id="searchInput" type="text" class="search-input"
+            placeholder="ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)..." autocomplete="off">
+        </form>
+      </div>
+    </div>
+  </div>
 
-    const searchClient = {
-      ...algoliaClient,
-      search(requests) {
-        if (requests.every(({ params }) => !params.query && !params.filters && (!params.facets || params.facets.length === 0))) {
-          return Promise.resolve({
-            results: requests.map(() => ({
-              hits: [],
-              nbHits: 0,
-              nbPages: 0,
-              page: 0,
-              processingTimeMS: 0,
-            })),
-          });
-        }
+  <div class="container-fluid">
 
-        const cacheKey = JSON.stringify(requests);
-        if (requestCache.has(cacheKey)) {
-          return Promise.resolve(requestCache.get(cacheKey));
-        }
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden text-center py-12">
+      <div class="w-10 h-10 border-4 border-[#3498db] border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <p class="text-lg text-gray-500 mt-4">جاري البحث في المصادر...</p>
+    </div>
 
-        return algoliaClient.search(requests).then((response) => {
-          requestCache.set(cacheKey, response);
-          return response;
-        });
+    <!-- No Results State -->
+    <div id="noResultsState" class="hidden text-center py-12">
+      <div class="bg-gray-50 rounded-lg p-8 max-w-lg mx-auto">
+        <i data-lucide="search-x" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
+        <p class="text-xl font-bold text-gray-700 mb-2">لم يتم العثور على نتائج</p>
+        <p class="text-gray-500">حاول استخدام كلمات مختلفة أو تأكد من الإملاء.</p>
+      </div>
+    </div>
+
+    <!-- Search Results -->
+    <div id="resultsList" class="results-list hidden">
+      <!-- Injected Items -->
+    </div>
+
+    <!-- Home dashboard sections removed as per user request -->
+    <div id="homeDashboard"></div>
+  </div>
+
+  </div>
+  <div class="card animate-pulse">
+    <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+    <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+  </div>
+  <div class="card animate-pulse">
+    <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+    <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+  </div>
+  </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="text-center text-gray-400 text-sm py-10 border-t border-gray-200 mt-16">
+    <p>&copy; 2025 الموسوعة الشاملة. جميع الحقوق محفوظة.</p>
+  </div>
+
+  </div>
+
+  <!-- Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
+
+    // --- Configuration ---
+    const CONFIG = {
+      hadith: {
+        appId: '88G4AVERCC',
+        apiKey: '76402a5d814264e01fb86ca687d26e30',
+        indexName: 'firebase-hadeth',
+        firebaseCollection: 'hadiths'
       },
+      history: {
+        appId: '88G4AVERCC',
+        apiKey: '33b0b484f534b2ae2dac948d588345a6',
+        indexName: 'algolia_unified'
+      },
+      scholars: {
+        appId: '3XD12I7386',
+        apiKey: '981ea91e88c65be8aadf2113c207b9c5',
+        indexName: 'trajum'
+      },
+      firebase: {
+        apiKey: "AIzaSyBYJ2pVoWJ5ednWOnnF2dOJ43MJvDi_8rw",
+        authDomain: "hadeth-7baf7.firebaseapp.com",
+        projectId: "hadeth-7baf7",
+        storageBucket: "hadeth-7baf7.firebasestorage.app",
+        messagingSenderId: "401684715520",
+        appId: "1:401684715520:web:297abdb6aee1fb3176a0e5"
+      }
     };
 
-    // --- Components ---
+    // Initialize Firebase
+    const app = initializeApp(CONFIG.firebase);
+    const db = getFirestore(app);
 
-    const Stats = () => {
-      const { nbHits, processingTimeMS, results } = useStats();
-      if (!results || !results.query) return null;
-      return (
-        <div className="text-xs text-slate-500 mt-2 flex gap-2">
-          <span>النتائج الكلية: <span className="font-bold">{nbHits.toLocaleString('ar-EG')}</span></span>
-          <span>(تم البحث في {processingTimeMS}ms)</span>
-        </div>
-      );
+    // Initialize Algolia Clients
+    const clients = {
+      hadith: algoliasearch(CONFIG.hadith.appId, CONFIG.hadith.apiKey).initIndex(CONFIG.hadith.indexName),
+      history: algoliasearch(CONFIG.history.appId, CONFIG.history.apiKey).initIndex(CONFIG.history.indexName),
+      scholars: algoliasearch(CONFIG.scholars.appId, CONFIG.scholars.apiKey).initIndex(CONFIG.scholars.indexName)
     };
 
-    const CustomPagination = () => {
-      const { pages, currentRefinement, refine, isFirstPage, isLastPage, nbHits } = usePagination();
-      if (pages.length === 0 || nbHits === 0) return null;
+    // DOM Elements
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const searchTabs = document.querySelectorAll('.search-tab');
+    const resultsList = document.getElementById('resultsList');
+    const homeDashboard = document.getElementById('homeDashboard');
+    const loadingState = document.getElementById('loadingState');
+    const noResultsState = document.getElementById('noResultsState');
 
-      return (
-        <div className="flex flex-wrap items-center gap-1 text-sm font-sans mt-6 select-none justify-center">
-          <button
-            onClick={() => !isFirstPage && refine(currentRefinement - 1)}
-            disabled={isFirstPage}
-            className={`px-3 py-1 rounded border ${isFirstPage ? 'text-gray-300 border-transparent cursor-not-allowed' : 'text-wiki-link border-slate-200 hover:bg-slate-100'}`}
-          >
-            السابق
-          </button>
-          {pages.map(page => (
-            <button
-              key={page}
-              onClick={() => refine(page)}
-              className={`px-3 py-1 rounded border min-w-[32px] ${currentRefinement === page
-                ? 'bg-slate-600 text-white border-slate-600 font-bold'
-                : 'text-wiki-link border-slate-200 hover:bg-slate-100'
-                }`}
-            >
-              {page + 1}
-            </button>
-          ))}
-          <button
-            onClick={() => !isLastPage && refine(currentRefinement + 1)}
-            disabled={isLastPage}
-            className={`px-3 py-1 rounded border ${isLastPage ? 'text-gray-300 border-transparent cursor-not-allowed' : 'text-wiki-link border-slate-200 hover:bg-slate-100'}`}
-          >
-            التالي
-          </button>
-        </div>
-      );
-    };
+    let currentTab = 'all';
 
-    const CustomSearchBox = () => {
-      const { query, refine } = useSearchBox();
-      const [inputValue, setInputValue] = useState(query || '');
-      const [searchMode, setSearchMode] = useState('best');
-      const inputRef = useRef(null);
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      // Featured content removed as per user request
 
-      useEffect(() => {
-        if (query !== inputValue && query !== undefined) {
-          if (inputValue === '') setInputValue(query);
+      // Restore search state if available
+      const lastResults = sessionStorage.getItem('lastSearchResults');
+      const lastTerm = sessionStorage.getItem('lastSearchTerm');
+      const lastTab = sessionStorage.getItem('lastActiveTab');
+
+      if (lastResults && lastTerm) {
+        // Restore input
+        searchInput.value = lastTerm;
+
+        // Restore tab
+        if (lastTab) {
+          searchTabs.forEach(t => {
+            t.classList.remove('active');
+            if (t.dataset.target === lastTab) {
+              t.classList.add('active');
+            }
+          });
+          currentTab = lastTab;
+          const placeholders = {
+            all: "ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)...",
+            hadith: "ابحث في الأحاديث (مثلاً: إنما الأعمال بالنيات)...",
+            history: "ابحث في التاريخ (مثلاً: معركة بدر)...",
+            scholars: "ابحث عن عالم (مثلاً: ابن تيمية)..."
+          };
+          if (placeholders[lastTab]) {
+            searchInput.placeholder = placeholders[lastTab];
+          }
         }
-      }, [query]);
 
-      const buildQuery = (val, mode) => {
-        const cleanVal = val.trim();
-        if (!cleanVal) return '';
+        // Restore UI
+        homeDashboard.classList.add('hidden');
+        loadingState.classList.add('hidden');
+        noResultsState.classList.add('hidden');
+        resultsList.classList.remove('hidden');
 
-        switch (mode) {
-          case 'phrase': return `"${cleanVal}"`;
-          case 'and': return cleanVal.split(/\s+/).map(w => `+${w}`).join(' ');
-          case 'fuzzy': return cleanVal;
-          case 'best': default: return cleanVal;
-        }
-      };
-
-      const handleSearch = (val, mode) => {
-        const finalQuery = buildQuery(val, mode);
-        refine(finalQuery);
-      };
-
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        handleSearch(inputValue, searchMode);
-      };
-
-      const handleModeChange = (mode) => {
-        setSearchMode(mode);
-        if (inputValue.trim()) {
-          handleSearch(inputValue, mode);
-        }
-      };
-
-      return (
-        <div className="search-container">
-          <form onSubmit={handleSubmit} className="search-input-wrapper mb-4">
-            <input
-              ref={inputRef}
-              type="search"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.currentTarget.value)}
-              placeholder="ابحث في الموسوعة التاريخية..."
-              className="search-input"
-            />
-            <button type="submit" className="search-btn">
-              <Search className="w-5 h-5" />
-            </button>
-          </form>
-
-          <div className="flex justify-center flex-wrap gap-4 text-sm mt-4">
-            <label className={`cursor-pointer select-none px-3 py-1 rounded-full transition-all ${searchMode === 'best' ? 'bg-blue-100 text-blue-700 font-bold' : 'text-gray-500 hover:bg-gray-100'}`}>
-              <input type="radio" name="searchMode" className="hidden" checked={searchMode === 'best'} onChange={() => handleModeChange('best')} />
-              <span>بحث ذكي</span>
-            </label>
-            <label className={`cursor-pointer select-none px-3 py-1 rounded-full transition-all ${searchMode === 'phrase' ? 'bg-blue-100 text-blue-700 font-bold' : 'text-gray-500 hover:bg-gray-100'}`}>
-              <input type="radio" name="searchMode" className="hidden" checked={searchMode === 'phrase'} onChange={() => handleModeChange('phrase')} />
-              <span>عبارة دقيقة</span>
-            </label>
-          </div>
-        </div>
-      );
-    };
-
-    const BookFilter = () => {
-      const { items, refine } = useRefinementList({
-        attribute: 'book_title',
-        sortBy: ['count:desc', 'name:asc'],
-        limit: 20
-      });
-
-      return (
-        <div className="mt-2 mb-4">
-          <div className="flex items-center justify-end gap-2 mb-2 text-xs text-slate-500">
-            <span>اختر الكتاب للبحث فيه:</span>
-            <Library className="w-3 h-3" />
-          </div>
-          <div className="flex flex-wrap justify-end gap-3">
-            {items.map((item) => {
-              return (
-                <button
-                  key={item.value}
-                  onClick={() => refine(item.value)}
-                  className={`
-                        group flex items-center gap-3 px-3 py-2 rounded border transition-all
-                        ${item.isRefined
-                      ? 'bg-white border-wiki-link ring-1 ring-wiki-link shadow-sm'
-                      : 'bg-white border-slate-300 hover:border-slate-400 hover:bg-slate-50'}
-                    `}
-                >
-                  <span className="text-xs font-bold text-slate-400 font-mono">({item.count})</span>
-                  <span className={`text-sm font-serif ${item.isRefined ? 'text-wiki-link font-bold' : 'text-slate-700'}`}>
-                    {item.label}
-                  </span>
-                  <BookOpen className={`w-4 h-4 ${item.isRefined ? 'text-wiki-link' : 'text-slate-300'}`} />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      );
-    };
-
-    // --- Reader Component with Improved Navigation ---
-
-    const ReaderView = ({ initialHit, onClose }) => {
-      const ZOOM_LEVELS = [20, 24, 28, 34, 42];
-      const [zoomIndex, setZoomIndex] = useState(1); // Start at 24px
-      const [currentHit, setCurrentHit] = useState(initialHit);
-      const [loading, setLoading] = useState(false);
-      const contentRef = useRef(null);
-
-      useEffect(() => {
-        setCurrentHit(initialHit);
-      }, [initialHit]);
-
-      const handleZoom = () => {
-        setZoomIndex((prev) => (prev + 1) % ZOOM_LEVELS.length);
-      };
-
-      const fetchAdjacentPage = async (direction) => {
-        if (loading) return;
-        setLoading(true);
-
+        // Render results
         try {
-          const currentPart = parseInt(currentHit.part_number, 10);
-          const currentPage = parseInt(currentHit.page_number, 10);
-          const bookTitle = currentHit.book_title;
-          const safeTitle = bookTitle.replace(/"/g, '\\"');
-
-          if (isNaN(currentPart) || isNaN(currentPage)) throw new Error("بيانات الصفحة غير صالحة");
-
-          let targetHit = null;
-
-          // STRATEGY 1: Direct Lookup
-          const expectedPage = direction === 'next' ? currentPage + 1 : currentPage - 1;
-
-          if (expectedPage > 0) {
-            const directResponse = await algoliaClient.search([{
-              indexName: INDEX_NAME,
-              params: {
-                query: '',
-                filters: `book_title:"${safeTitle}" AND part_number=${currentPart} AND page_number=${expectedPage}`,
-                hitsPerPage: 5
-              }
-            }]);
-
-            const candidates = directResponse.results[0].hits;
-            if (candidates.length > 0) {
-              targetHit = candidates.sort((a, b) => {
-                const lenA = a.text_content ? a.text_content.length : 0;
-                const lenB = b.text_content ? b.text_content.length : 0;
-                return lenB - lenA;
-              })[0];
-            }
-          }
-
-          // STRATEGY 2: Range Lookup
-          if (!targetHit) {
-            const response = await algoliaClient.search([{
-              indexName: INDEX_NAME,
-              params: {
-                query: '',
-                filters: `book_title:"${safeTitle}" AND part_number=${currentPart}`,
-                numericFilters: [
-                  direction === 'next' ? `page_number > ${currentPage}` : `page_number < ${currentPage}`
-                ],
-                hitsPerPage: 20
-              }
-            }]);
-
-            const hits = response.results[0].hits;
-
-            if (hits.length > 0) {
-              const sortedByPage = hits.sort((a, b) => {
-                return direction === 'next'
-                  ? a.page_number - b.page_number
-                  : b.page_number - a.page_number;
-              });
-              const closestPageNum = sortedByPage[0].page_number;
-              const bestPageCandidates = sortedByPage.filter(h => h.page_number === closestPageNum);
-              targetHit = bestPageCandidates.sort((a, b) => {
-                const lenA = a.text_content ? a.text_content.length : 0;
-                const lenB = b.text_content ? b.text_content.length : 0;
-                return lenB - lenA;
-              })[0];
-            }
-          }
-
-          // STRATEGY 3: Adjacent Part
-          if (!targetHit) {
-            if (direction === 'next') {
-              const nextPart = currentPart + 1;
-              const partResponse = await algoliaClient.search([{
-                indexName: INDEX_NAME,
-                params: {
-                  query: '',
-                  filters: `book_title:"${safeTitle}" AND part_number=${nextPart}`,
-                  hitsPerPage: 1,
-                }
-              }]);
-
-              if (partResponse.results[0].hits.length > 0) {
-                targetHit = partResponse.results[0].hits[0];
-              }
-            } else {
-              const prevPart = currentPart - 1;
-              if (prevPart >= 1) {
-                const partResponse = await algoliaClient.search([{
-                  indexName: INDEX_NAME,
-                  params: {
-                    query: '',
-                    filters: `book_title:"${safeTitle}" AND part_number=${prevPart}`,
-                    hitsPerPage: 50,
-                  }
-                }]);
-                if (partResponse.results[0].hits.length > 0) {
-                  const sorted = partResponse.results[0].hits.sort((a, b) => b.page_number - a.page_number);
-                  targetHit = sorted[0];
-                }
-              }
-            }
-          }
-
-          if (targetHit) {
-            setCurrentHit(targetHit);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          } else {
-            if (direction === 'next') alert("وصلت إلى نهاية الكتاب.");
-            else alert("هذه بداية الكتاب.");
-          }
-
-        } catch (error) {
-          console.error("Navigation Error:", error);
-          alert("حدث خطأ: " + error.message);
-        } finally {
-          setLoading(false);
+          const results = JSON.parse(lastResults);
+          renderResults(results);
+        } catch (e) {
+          console.error("Error parsing saved results:", e);
+          sessionStorage.removeItem('lastSearchResults');
         }
-      };
+      }
+    });
+    // pageshow listener removed – allow browser back navigation to restore previous results
 
-      const formattedText = useMemo(() => {
-        if (!currentHit || !currentHit.text_content) return null;
-        const rawText = currentHit.text_content;
-        const lines = rawText
-          .replace(/\|\|/g, '\n')
-          .replace(/\.(?=\s|$)/g, '.\n')
-          .split('\n');
+    // --- Tab Switching ---
+    searchTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        searchTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentTab = tab.dataset.target;
 
-        return (
-          <div className="text-justify">
-            {lines.map((line, index) => {
-              const trimmedLine = line.trim();
-              if (!trimmedLine) return null;
-              return <p key={index} className="mb-4 block">{trimmedLine}</p>;
-            })}
-          </div>
-        );
-      }, [currentHit]);
+        const placeholders = {
+          all: "ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)...",
+          hadith: "ابحث في الأحاديث (مثلاً: إنما الأعمال بالنيات)...",
+          history: "ابحث في التاريخ (مثلاً: معركة بدر)...",
+          scholars: "ابحث عن عالم (مثلاً: ابن تيمية)..."
+        };
+        searchInput.placeholder = placeholders[currentTab];
 
-      if (!currentHit) return null;
+        if (searchInput.value.trim()) {
+          handleSearch(searchInput.value.trim());
+        }
+      });
+    });
 
-      return (
-        <div className="fixed inset-0 z-50 bg-paper-bg overflow-y-auto animate-fade-in">
-          {/* Main Content Container - Centered and Full Height */}
-          <div className="min-h-screen w-full max-w-5xl mx-auto bg-white shadow-2xl relative flex flex-col">
+    // --- Search Logic ---
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const term = searchInput.value.trim();
+      if (term) handleSearch(term);
+    });
 
-            {/* Header Info (Minimal) */}
-            <div className="p-6 border-b border-slate-100 text-center select-none">
-              <h2 className="text-xl font-bold text-slate-800 font-serif">{currentHit.book_title}</h2>
-              <div className="text-sm text-slate-500 font-mono mt-1">
-                جزء {currentHit.part_number} • صفحة {currentHit.page_number}
-              </div>
+    async function handleSearch(term) {
+      homeDashboard.classList.add('hidden');
+      resultsList.innerHTML = '';
+      resultsList.classList.add('hidden');
+      noResultsState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+
+      try {
+        let results = [];
+
+        if (currentTab === 'all') {
+          const [hadithRes, historyRes, scholarsRes] = await Promise.all([
+            clients.hadith.search(term, { hitsPerPage: 5 }),
+            clients.history.search(term, { hitsPerPage: 5 }),
+            clients.scholars.search(term, { hitsPerPage: 5 })
+          ]);
+
+          const hydratedHadith = await hydrateHadithResults(hadithRes.hits);
+
+          results = [
+            ...formatResults(hydratedHadith, 'hadith'),
+            ...formatResults(scholarsRes.hits, 'scholars'),
+            ...formatResults(historyRes.hits, 'history')
+          ];
+        } else {
+          const res = await clients[currentTab].search(term, { hitsPerPage: 20 });
+          let hits = res.hits;
+          if (currentTab === 'hadith') {
+            hits = await hydrateHadithResults(hits);
+          }
+          results = formatResults(hits, currentTab);
+        }
+
+        loadingState.classList.add('hidden');
+
+        if (results.length === 0) {
+          noResultsState.classList.remove('hidden');
+          // Clear saved results if no results found, but keep term/tab? 
+          // Better to save empty state so it persists
+          sessionStorage.setItem('lastSearchResults', JSON.stringify([]));
+        } else {
+          resultsList.classList.remove('hidden');
+          renderResults(results);
+          // Save state
+          sessionStorage.setItem('lastSearchTerm', term);
+          sessionStorage.setItem('lastActiveTab', currentTab);
+          sessionStorage.setItem('lastSearchResults', JSON.stringify(results));
+        }
+
+      } catch (error) {
+        console.error("Search Error:", error);
+        loadingState.classList.add('hidden');
+        resultsList.innerHTML = `<p class="text-center text-red-500">حدث خطأ أثناء البحث. يرجى المحاولة مرة أخرى.</p>`;
+        resultsList.classList.remove('hidden');
+      }
+    }
+
+    // --- Hydration Logic for Hadith ---
+    async function hydrateHadithResults(hits) {
+      const promises = hits.map(async (hit) => {
+        try {
+          const docRef = doc(db, CONFIG.hadith.firebaseCollection, hit.objectID);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            return { ...hit, ...docSnap.data() };
+          }
+          return hit;
+        } catch (e) {
+          console.error("Error hydrating hadith:", hit.objectID, e);
+          return hit;
+        }
+      });
+      return Promise.all(promises);
+    }
+
+    function formatResults(hits, type) {
+      return hits.map(hit => {
+        let title, snippet, link, meta;
+
+        if (type === 'hadith') {
+          title = hit.text ? hit.text.substring(0, 100) + "..." : "حديث شريف";
+          snippet = hit.text || "";
+          link = `details_hadith.html?id=${hit.objectID}`;
+
+          let hukmBadge = '';
+          if (hit.hukm) {
+            const h = Array.isArray(hit.hukm) ? hit.hukm[0] : hit.hukm;
+            let colorClass = 'badge-info';
+            if (h.includes('صحيح')) colorClass = 'badge-success';
+            if (h.includes('ضعيف') || h.includes('موضوع')) colorClass = 'badge-danger';
+            hukmBadge = `<span class="badge ${colorClass}">${h}</span>`;
+          }
+
+          const source = hit.source ? (Array.isArray(hit.source) ? hit.source[0] : hit.source) : '';
+          const rawi = hit.rawi ? (Array.isArray(hit.rawi) ? hit.rawi[0] : hit.rawi) : '';
+
+          // Construct Meta with Narrator
+          meta = `
+            <div class="flex flex-wrap gap-2 items-center">
+                ${hukmBadge}
+                ${source ? `<span class="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">${source}</span>` : ''}
+                ${rawi ? `<span class="text-xs text-brown font-bold">الراوي: ${rawi}</span>` : ''}
             </div>
+          `;
 
-            {/* Text Content */}
-            <div className="flex-grow p-8 md:p-16" ref={contentRef}>
-              {loading && (
-                <div className="absolute inset-0 bg-white/80 z-10 flex flex-col items-center justify-center">
-                  <div className="loader w-10 h-10 border-4 border-slate-400"></div>
-                </div>
-              )}
-              <div className="font-serif text-slate-800 leading-loose transition-all duration-300" style={{ fontSize: `${ZOOM_LEVELS[zoomIndex]}px` }}>
-                {formattedText}
-              </div>
-            </div>
+        } else if (type === 'scholars') {
+          title = hit.name;
+          snippet = hit.trj ? hit.trj.substring(0, 200) + "..." : "";
+          link = `details_scholars.html?id=${hit.objectID}`;
+          meta = `<span class="badge badge-info">تراجم</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
+        } else if (type === 'history') {
+          title = hit.name || "بدون عنوان";
+          // Use full_intro or text for snippet
+          const content = hit.full_intro || hit.text || "";
+          snippet = content.substring(0, 200) + "...";
+          link = `history.html?id=${hit.objectID}`;
+          meta = `<span class="badge badge-warning">تاريخ</span>`;
+        }
 
-            {/* Footer / Next Page Trigger */}
-            <div className="p-12 text-center border-t border-slate-100 bg-slate-50">
-              <button onClick={() => fetchAdjacentPage('next')} className="text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center gap-2 mx-auto">
-                <span>اضغط للانتقال للصفحة التالية</span>
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        return { type, title, snippet, link, meta, raw: hit };
+      });
+    }
 
-          {/* Floating Action Buttons (FABs) */}
-
-          {/* Back Button - Top Right */}
-          <button
-            onClick={onClose}
-            className="fixed top-6 right-6 z-50 w-12 h-12 bg-white rounded-full shadow-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-all flex items-center justify-center group"
-            title="عودة للبحث"
-          >
-            <X className="w-6 h-6" />
-            <span className="absolute right-14 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">عودة</span>
-          </button>
-
-          {/* Zoom Button - Bottom Right */}
-          <button
-            onClick={handleZoom}
-            className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-blue-600 rounded-full shadow-xl text-white hover:bg-blue-700 hover:scale-105 transition-all flex items-center justify-center group"
-            title="تكبير الخط"
-          >
-            <ZoomIn className="w-7 h-7" />
-            <span className="absolute right-16 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              {zoomIndex === ZOOM_LEVELS.length - 1 ? 'إعادة تعيين' : 'تكبير'}
-            </span>
-            <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full text-[10px] flex items-center justify-center border-2 border-white">
-              {zoomIndex + 1}
-            </span>
-          </button>
-
-          {/* Navigation Buttons - Side Floating */}
-
-          {/* Next Page (Left Side) */}
-          <button
-            onClick={() => fetchAdjacentPage('next')}
-            disabled={loading}
-            className="fixed top-1/2 left-6 -translate-y-1/2 z-50 w-12 h-12 bg-white/90 backdrop-blur rounded-full shadow-lg border border-slate-200 text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:scale-110 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed group"
-            title="الصفحة التالية"
-          >
-            <ChevronLeft className="w-8 h-8" />
-            <span className="absolute left-14 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">التالية</span>
-          </button>
-
-          {/* Previous Page (Right Side) */}
-          <button
-            onClick={() => fetchAdjacentPage('prev')}
-            disabled={loading}
-            className="fixed top-1/2 right-6 -translate-y-1/2 z-40 w-12 h-12 bg-white/90 backdrop-blur rounded-full shadow-lg border border-slate-200 text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:scale-110 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed group"
-            title="الصفحة السابقة"
-          >
-            <ChevronRight className="w-8 h-8" />
-            <span className="absolute right-14 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">السابقة</span>
-          </button>
-
-        </div>
-      );
-    };
-
-    const HitCard = ({ hit, onClick }) => {
-      return (
-        <article className="hit-item">
-          <div className="hit-meta">
-            <BookOpen className="w-4 h-4" />
-            <span>{hit.book_title}</span>
-            <span className="mx-2">•</span>
-            <span>جزء {hit.part_number}</span>
-            <span className="mx-2">•</span>
-            <span>صفحة {hit.page_number}</span>
-          </div>
-          <h3 className="hit-title" onClick={onClick}>
-            <Highlight attribute="book_title" hit={hit} />
+    function renderResults(results) {
+      results.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        div.innerHTML = `
+          <div class="result-meta">${item.meta}</div>
+          <h3 class="result-title">
+            <a href="${item.link}">${item.title}</a>
           </h3>
-          <div className="hit-snippet">
-            <Snippet attribute="text_content" hit={hit} />
-          </div>
-        </article>
-      );
-    };
+          <div class="result-snippet">${item.snippet}</div>
+        `;
+        resultsList.appendChild(div);
+      });
+    }
 
-    const AppContent = () => {
-      const { hits, results } = useHits();
-      const [selectedHit, setSelectedHit] = useState(null);
+    // --- Featured Content Logic ---
+    // Featured Content Logic removed
 
-      const hasSearched = results && results.query && results.query.length > 0;
-
-      // --- DEDUPLICATION LOGIC ---
-      const uniqueHits = useMemo(() => {
-        const seen = new Set();
-        return hits.filter(hit => {
-          const key = `${hit.book_title}-${hit.part_number}-${hit.page_number}`;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-      }, [hits]);
-
-      const handleRead = (hit) => {
-        setSelectedHit(hit);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-
-      const handleCloseReader = () => {
-        setSelectedHit(null);
-      };
-
-      return (
-        <div className="min-h-[500px]">
-          <div className={selectedHit !== null ? 'hidden' : 'block'}>
-            <div className="mb-8">
-              <CustomSearchBox />
-              {hasSearched && <Stats />}
-              <BookFilter />
-            </div>
-
-            {!hasSearched ? (
-              <div className="py-20 text-center text-gray-500">
-                <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p className="text-xl mb-2 font-serif">مرحباً بك في الموسوعة التاريخية</p>
-                <p className="text-sm">اكتب كلمة البحث في الصندوق أعلاه للبدء في استكشاف آلاف الصفحات.</p>
-              </div>
-            ) : uniqueHits.length === 0 ? (
-              <div className="py-8 text-center text-gray-600 bg-gray-50 rounded-lg">
-                <p className="font-bold mb-1">لم يتم العثور على نتائج.</p>
-                <p className="text-sm">جرب كلمات مختلفة أو تأكد من الإملاء.</p>
-              </div>
-            ) : (
-              <div className="hits-list">
-                {uniqueHits.map((hit) => (
-                  <HitCard key={hit.objectID} hit={hit} onClick={() => handleRead(hit)} />
-                ))}
-              </div>
-            )}
-
-            {hasSearched && (
-              <div className="mt-10 border-t pt-6 flex justify-center">
-                <CustomPagination />
-              </div>
-            )}
-          </div>
-
-          {selectedHit !== null && (
-            <ReaderView
-              initialHit={selectedHit}
-              onClose={handleCloseReader}
-            />
-          )}
-        </div>
-      );
-    };
-
-    // --- Main Layout ---
-
-    const App = () => {
-      return (
-        <div className="container-fluid">
-          <header className="text-center">
-            <div className="flex items-center justify-center gap-3">
-              <Globe className="w-8 h-8 text-blue-600" />
-              <h1>الموسوعة التاريخية</h1>
-              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">v3.0</span>
-            </div>
-          </header>
-
-          <main>
-            <InstantSearch
-              searchClient={searchClient}
-              indexName={INDEX_NAME}
-              future={{ preserveSharedStateOnUnmount: true }}
-            >
-              <Configure
-                hitsPerPage={10}
-                attributesToSnippet={['text_content:100']}
-                snippetEllipsisText="..."
-                advancedSyntax={true}
-                facets={['book_title']}
-                maxValuesPerFacet={20}
-              />
-              <AppContent />
-            </InstantSearch>
-          </main>
-        </div>
-      );
-    };
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
   </script>
 </body>
 

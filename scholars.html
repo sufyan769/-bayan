@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>الموسوعة - التراجم والتاريخ</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Unified Navigation -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i data-lucide="library"></i>
+        <span>الموسوعة الشاملة</span>
+      </a>
+      <div class="nav-links">
+        <a href="hadith.html" class="nav-link">
+          <i data-lucide="book-open-check" class="w-4 h-4"></i>
+          الحديث الشريف
+        </a>
+        <a href="scholars.html" class="nav-link active">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          تراجم العلماء
+        </a>
+        <a href="history.html" class="nav-link">
+          <i data-lucide="scroll" class="w-4 h-4"></i>
+          البداية والنهاية
+        </a>
+        <a href="algolia-search.html" class="nav-link">
+          <i data-lucide="book" class="w-4 h-4"></i>
+          موسوعة الفتاوى
+        </a>
+        <a href="firebase-search.html" class="nav-link">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          بحث Firebase
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+
+    <!-- Header -->
+    <header>
+      <div class="flex items-center justify-center gap-3 mb-2">
+        <i data-lucide="scroll-text" class="w-10 h-10 text-[#3498db]"></i>
+        <h1>تراجم العلماء</h1>
+      </div>
+      <div class="subtitle">المكتبة الحرة للتاريخ والتراجم</div>
+    </header>
+
+    <!-- Search Section -->
+    <div class="search-container">
+      <form id="searchForm" class="search-input-wrapper">
+        <input id="searchInput" type="text" class="search-input" placeholder="ابحث عن عالم، كتاب، أو سنة وفاة..."
+          autocomplete="off">
+        <button type="submit" class="search-btn">
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden text-center py-8">
+      <div class="w-8 h-8 border-4 border-[#3498db] border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <p class="text-sm text-gray-500 mt-4">جاري البحث...</p>
+    </div>
+
+    <!-- No Results State -->
+    <div id="noResultsState" class="hidden text-center py-8">
+      <p class="text-lg text-gray-600">لم يتم العثور على نتائج مطابقة.</p>
+    </div>
+
+    <!-- Search Results -->
+    <div id="resultsList" class="results-list hidden">
+      <!-- Injected Items -->
+    </div>
+
+    <!-- Featured Section -->
+    <div id="featuredSection">
+      <div class="section-title">
+        <i data-lucide="sparkles" class="w-6 h-6 text-yellow-500"></i>
+        <span>مختارات من التراجم</span>
+      </div>
+
+      <div id="featuredLoader" class="text-center py-10">
+        <div class="w-8 h-8 border-4 border-[#3498db] border-t-transparent rounded-full animate-spin mx-auto"></div>
+      </div>
+
+      <div id="featuredGrid" class="featured-grid">
+        <!-- Injected Cards -->
+      </div>
+    </div>
+
+    <!-- Footer Stats (Subtle) -->
+    <div class="text-center text-gray-400 text-sm py-10 border-t border-gray-100 mt-10">
+      <p>&copy; 2025 الموسوعة الشاملة. جميع الحقوق محفوظة.</p>
+    </div>
+
+  </div>
+
+  <!-- Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      limit,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Algolia Client Import
+    import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBni4eUpBlMrBVr-I-_bTLDyYpdJgkBnpw",
+      authDomain: "islsm-9.firebaseapp.com",
+      projectId: "islsm-9",
+      storageBucket: "islsm-9.firebasestorage.app",
+      messagingSenderId: "940034885206",
+      appId: "1:940034885206:web:4013d7a5297f2ff7b41df7",
+      measurementId: "G-JF11WVCY5P"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Algolia Configuration
+    const ALGOLIA_APP_ID = "3XD12I7386";
+    const ALGOLIA_API_KEY = "981ea91e88c65be8aadf2113c207b9c5";
+    const ALGOLIA_INDEX_NAME = "trajum";
+
+    const algoliaClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY);
+    const algoliaIndex = algoliaClient.initIndex(ALGOLIA_INDEX_NAME);
+
+    const CACHE_KEY = 'scholar_search_cache';
+    const FEATURED_CACHE_KEY = 'scholar_featured_cache';
+    const FEATURED_CACHE_TTL = 3 * 24 * 60 * 60 * 1000;
+
+    const form = document.getElementById("searchForm");
+    const input = document.getElementById("searchInput");
+    const resultsList = document.getElementById("resultsList");
+    const featuredSection = document.getElementById("featuredSection");
+    const featuredGrid = document.getElementById("featuredGrid");
+    const featuredLoader = document.getElementById("featuredLoader");
+    const loadingState = document.getElementById("loadingState");
+    const noResultsState = document.getElementById("noResultsState");
+
+    lucide.createIcons();
+
+    // 1. Initialization
+    document.addEventListener("DOMContentLoaded", () => {
+      // Check Search Cache first
+      const searchCache = sessionStorage.getItem(CACHE_KEY);
+      if (searchCache) {
+        try {
+          const { term, docs, scrollY } = JSON.parse(searchCache);
+          if (term) input.value = term;
+          if (docs && docs.length > 0) {
+            renderSearchResults(docs);
+            if (scrollY) setTimeout(() => window.scrollTo(0, scrollY), 0);
+            return;
+          }
+        } catch (e) { sessionStorage.removeItem(CACHE_KEY); }
+      }
+
+      // If no search active, load Featured
+      loadFeaturedContent();
+    });
+
+    // 2. Featured Content Logic
+    async function loadFeaturedContent() {
+      try {
+        let candidates = [];
+        const now = Date.now();
+        const cachedFeatured = localStorage.getItem(FEATURED_CACHE_KEY);
+
+        let needsFetch = true;
+
+        if (cachedFeatured) {
+          const { timestamp, docs } = JSON.parse(cachedFeatured);
+          if (now - timestamp < FEATURED_CACHE_TTL && docs.length > 0) {
+            candidates = docs;
+            needsFetch = false;
+          }
+        }
+
+        if (needsFetch) {
+          const q = query(collection(db, "scholars_biographies"), limit(50));
+          const snap = await getDocs(q);
+          candidates = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+          localStorage.setItem(FEATURED_CACHE_KEY, JSON.stringify({
+            timestamp: now,
+            docs: candidates
+          }));
+        }
+
+        renderFeatured(pickRandom(candidates, 9)); // Show 9 items for grid
+        featuredLoader.classList.add('hidden');
+
+      } catch (err) {
+        console.error(err);
+        featuredLoader.classList.add('hidden');
+        featuredGrid.innerHTML = '<p class="text-red-500 text-center col-span-3">تعذر تحميل المختارات.</p>';
+      }
+    }
+
+    function pickRandom(arr, count) {
+      const shuffled = [...arr].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function renderFeatured(items) {
+      featuredGrid.innerHTML = '';
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = "featured-card";
+
+        let excerpt = "لا يوجد نص.";
+        if (item.trj) {
+          excerpt = item.trj.replace(/\n/g, ' ').substring(0, 120);
+        }
+
+        div.innerHTML = `
+          <h3>
+            <a href="details_scholars.html?id=${item.objectID || item.id}">
+              ${item.name}
+            </a>
+          </h3>
+          <p>
+            ${excerpt}...
+          </p>
+          <div class="featured-meta">
+             <span>${item.death ? `توفي: ${item.death}` : ''}</span>
+             <a href="details_scholars.html?id=${item.objectID || item.id}" style="color: var(--accent-color); font-weight: bold;">اقرأ المزيد</a>
+          </div>
+        `;
+        featuredGrid.appendChild(div);
+      });
+    }
+
+    // 3. Search Logic
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const term = input.value.trim();
+      if (!term) return;
+
+      featuredSection.classList.add('hidden');
+      resultsList.classList.add('hidden');
+      resultsList.innerHTML = '';
+      noResultsState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      sessionStorage.removeItem(CACHE_KEY);
+
+      try {
+        const { hits } = await algoliaIndex.search(term, {
+          hitsPerPage: 20
+        });
+
+        if (hits.length === 0) {
+          loadingState.classList.add("hidden");
+          noResultsState.classList.remove("hidden");
+          return;
+        }
+
+        const docs = hits.map(hit => ({
+          ...hit,
+          id: hit.objectID
+        }));
+
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ term, docs, scrollY: 0 }));
+        renderSearchResults(docs);
+
+      } catch (err) {
+        console.error("Algolia Error:", err);
+        loadingState.classList.add("hidden");
+        resultsList.classList.remove("hidden");
+        resultsList.innerHTML = "<p class='text-red-600 text-center'>حدث خطأ أثناء الاتصال بمحرك البحث.</p>";
+      }
+    });
+
+    function renderSearchResults(docs) {
+      loadingState.classList.add("hidden");
+      featuredSection.classList.add('hidden');
+      resultsList.classList.remove("hidden");
+
+      const header = document.createElement('div');
+      header.className = "section-title";
+      header.innerHTML = `<i data-lucide="list" class="w-5 h-5"></i><span>نتائج البحث (${docs.length})</span>`;
+      resultsList.appendChild(header);
+      lucide.createIcons();
+
+      docs.forEach(doc => {
+        const article = document.createElement('article');
+        article.className = "result-item";
+
+        let excerpt = "";
+        if (doc.trj) excerpt = doc.trj.substring(0, 200) + "...";
+
+        article.innerHTML = `
+          <h3 class="result-title">
+            <a href="details_scholars.html?id=${doc.id}">
+              ${doc.name}
+            </a>
+          </h3>
+          <div class="result-meta">
+             ${doc.death ? `سنة الوفاة: ${doc.death}` : ''}
+             ${doc.full ? ` • ${doc.full}` : ''}
+          </div>
+          <div class="result-snippet">
+            ${excerpt}
+          </div>
+        `;
+
+        article.querySelector('a').addEventListener('click', () => {
+          const currentCache = sessionStorage.getItem(CACHE_KEY);
+          if (currentCache) {
+            const parsed = JSON.parse(currentCache);
+            parsed.scrollY = window.scrollY;
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify(parsed));
+          }
+        });
+
+        resultsList.appendChild(article);
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفاصيل الحديث</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="reader-body">
+
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <i data-lucide="library"></i>
+                <span>الموسوعة الشاملة</span>
+            </a>
+            <div class="nav-links">
+                <a href="hadith.html" class="nav-link active">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    الحديث الشريف
+                </a>
+                <a href="scholars.html" class="nav-link">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    تراجم العلماء
+                </a>
+                <a href="history.html" class="nav-link">
+                    <i data-lucide="scroll" class="w-4 h-4"></i>
+                    البداية والنهاية
+                </a>
+                <a href="algolia-search.html" class="nav-link">
+                    <i data-lucide="book" class="w-4 h-4"></i>
+                    موسوعة الفتاوى
+                </a>
+                <a href="firebase-search.html" class="nav-link">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    بحث Firebase
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div
+        style="padding: 10px 0; background: #f8f9fa; border-bottom: 1px solid var(--border-color); position: sticky; top: 60px; z-index: 40;">
+        <div class="container-fluid flex justify-between items-center">
+            <button onclick="window.location.href='index.html'"
+                class="flex items-center gap-2 text-gray-500 hover:text-[#3498db] transition-colors text-sm font-bold bg-transparent border-none cursor-pointer">
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                <span>العودة للبحث</span>
+            </button>
+            <div class="flex gap-3">
+                <button id="editBtn" class="btn btn-secondary flex items-center gap-2 text-sm py-1">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                    <span>تعديل</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="flex items-center justify-center h-screen">
+        <div class="w-10 h-10 border-4 border-[#3498db] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <div id="viewContainer" class="reader-container hidden">
+        <div class="flex justify-end gap-2 mb-6 print:hidden">
+            <button id="decreaseFont" class="btn btn-secondary py-1 px-2 text-xs">A-</button>
+            <button id="increaseFont" class="btn btn-secondary py-1 px-2 text-xs">A+</button>
+        </div>
+        <!-- 1. Hadith Text (Top) -->
+        <div id="viewText" class="article-text font-bold mb-8"></div>
+
+        <!-- 2. Metadata & Takhrij Container -->
+        <div class="bg-gray-50 p-6 rounded-lg border border-gray-100 mb-8">
+            <div id="metaBar" class="meta-bar mb-4"></div>
+            <div id="takhrijSection" class="hidden pt-4 border-t border-gray-200">
+                <h4 class="font-bold text-gray-500 mb-2 text-sm">التخريج</h4>
+                <p id="viewTakhrij" class="text-gray-600 leading-relaxed text-sm"></p>
+            </div>
+        </div>
+
+        <div id="extraSections" class="hidden">
+            <!-- 3. Sharh -->
+            <div id="sharhSection" class="hidden mb-8">
+                <h3 class="text-section-title">الشرح</h3>
+                <div id="viewSharh" class="article-text text-gray-700" style="font-size: 1.3rem;"></div>
+            </div>
+
+            <!-- 4. Osoul (New) -->
+            <div id="osoulSection" class="hidden mt-8 pt-8 border-t border-gray-100">
+                <h3 class="text-section-title">الأصول (Osoul)</h3>
+                <div id="viewOsoul" class="article-text text-gray-700" style="font-size: 1.3rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editContainer" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="font-bold text-lg">تعديل المحتوى</h3>
+                <button id="cancelBtnTop" class="text-gray-500 hover:text-red-500"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <div id="editFormBody" class="modal-body"></div>
+            <div class="modal-footer">
+                <button id="cancelBtn" class="btn btn-secondary">إلغاء</button>
+                <button id="saveBtn" class="btn btn-primary flex items-center gap-2">
+                    <span id="saveText">حفظ التغييرات</span>
+                    <div id="saveSpinner"
+                        class="hidden w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin">
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
+
+        const CONFIG = {
+            firebase: {
+                apiKey: "AIzaSyBYJ2pVoWJ5ednWOnnF2dOJ43MJvDi_8rw",
+                authDomain: "hadeth-7baf7.firebaseapp.com",
+                projectId: "hadeth-7baf7",
+                storageBucket: "hadeth-7baf7.firebasestorage.app",
+                messagingSenderId: "401684715520",
+                appId: "1:401684715520:web:297abdb6aee1fb3176a0e5"
+            },
+            algolia: { appId: '88G4AVERCC', apiKey: '76402a5d814264e01fb86ca687d26e30', index: 'firebase-hadeth' },
+            collection: 'hadiths'
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const docId = params.get("id");
+
+        const app = initializeApp(CONFIG.firebase, 'hadithApp');
+        const db = getFirestore(app);
+        const algoliaClient = algoliasearch(CONFIG.algolia.appId, CONFIG.algolia.apiKey);
+        const algoliaIndex = algoliaClient.initIndex(CONFIG.algolia.index);
+
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const viewContainer = document.getElementById('viewContainer');
+        const metaBar = document.getElementById('metaBar');
+        const viewText = document.getElementById('viewText');
+        const extraSections = document.getElementById('extraSections');
+        const viewSharh = document.getElementById('viewSharh');
+        const viewTakhrij = document.getElementById('viewTakhrij');
+        const sharhSection = document.getElementById('sharhSection');
+        const takhrijSection = document.getElementById('takhrijSection');
+        const osoulSection = document.getElementById('osoulSection');
+        const viewOsoul = document.getElementById('viewOsoul');
+        const editContainer = document.getElementById('editContainer');
+        const editFormBody = document.getElementById('editFormBody');
+
+        let currentData = null;
+        let currentFontSize = 24;
+
+        // Move lucide init to safe place
+        try { if (window.lucide) window.lucide.createIcons(); } catch (e) { }
+
+        function updateFontSize() {
+            if (viewText) {
+                viewText.style.fontSize = `${currentFontSize}px`;
+                viewText.style.lineHeight = `${currentFontSize * 0.13}`;
+            }
+            if (viewSharh) viewSharh.style.fontSize = `${currentFontSize - 4}px`;
+            if (viewOsoul) viewOsoul.style.fontSize = `${currentFontSize - 4}px`;
+        }
+        document.getElementById('increaseFont').addEventListener('click', () => { if (currentFontSize < 48) { currentFontSize += 2; updateFontSize(); } });
+        document.getElementById('decreaseFont').addEventListener('click', () => { if (currentFontSize > 16) { currentFontSize -= 2; updateFontSize(); } });
+
+        async function loadData() {
+            console.log("Loading data for ID:", docId);
+            if (!docId) {
+                loadingSpinner.innerHTML = "<p class='text-red-500'>رقم الحديث مفقود</p>";
+                return;
+            }
+            try {
+                let data = null;
+                // 1. Try Direct ID
+                const ref = doc(db, CONFIG.collection, docId);
+                const snap = await getDoc(ref);
+                if (snap.exists()) {
+                    console.log("Found by direct ID");
+                    data = { objectID: snap.id, ...snap.data() };
+                } else {
+                    // 2. Try String ID
+                    console.log("Trying string ID query...");
+                    let q = query(collection(db, CONFIG.collection), where("id", "==", String(docId)), limit(1));
+                    let s = await getDocs(q);
+                    if (!s.empty) {
+                        console.log("Found by string ID");
+                        data = { objectID: s.docs[0].id, ...s.docs[0].data() };
+                    } else {
+                        // 3. Try Number ID
+                        console.log("Trying number ID query...");
+                        q = query(collection(db, CONFIG.collection), where("id", "==", Number(docId)), limit(1));
+                        s = await getDocs(q);
+                        if (!s.empty) {
+                            console.log("Found by number ID");
+                            data = { objectID: s.docs[0].id, ...s.docs[0].data() };
+                        }
+                    }
+                }
+
+                console.log("Data loaded:", data);
+
+                if (!data) {
+                    loadingSpinner.innerHTML = "<p class='text-red-500'>عذراً، لم يتم العثور على الحديث المطلوب.</p>";
+                    return;
+                }
+
+                currentData = data;
+                renderView(data);
+
+                // Force show container
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+                if (viewContainer) viewContainer.classList.remove('hidden');
+
+                // Re-init icons after render
+                setTimeout(() => { try { if (window.lucide) window.lucide.createIcons(); } catch (e) { } }, 100);
+
+            } catch (e) {
+                console.error("Error loading data:", e);
+                if (loadingSpinner) loadingSpinner.innerHTML = `<div class="text-center text-red-500"><p class="font-bold">حدث خطأ في تحميل البيانات</p><p class="text-sm mt-2 text-gray-600" dir="ltr">${e.message}</p></div>`;
+            }
+        }
+
+        function renderView(data) {
+            // Clear previous content
+            if (metaBar) metaBar.innerHTML = '';
+            if (viewText) viewText.innerHTML = '';
+            if (viewSharh) viewSharh.innerHTML = '';
+            if (viewTakhrij) viewTakhrij.innerHTML = '';
+
+            // 1. Render Hadith Text (Top)
+            if (viewText) renderParagraphs(viewText, data.text);
+
+            // 2. Render Metadata & Takhrij (Below Text)
+            // We need to move metaBar and takhrijSection to a container below viewText if not already there.
+            // However, since we are just manipulating content, we can rely on the HTML structure update (which we will do in a separate step or assume is done).
+            // Wait, I need to update the HTML structure too. 
+            // Let's assume the HTML structure is updated to: Text -> MetaContainer -> Sharh -> Osoul
+
+            // Populate MetaBar
+            if (metaBar) {
+                addMetaItem('المصدر', Array.isArray(data.source) ? data.source.join(', ') : data.source, 'text-brown');
+
+                let hukmClass = 'text-brown';
+                const h = Array.isArray(data.hukm) ? data.hukm[0] : data.hukm;
+                if (h && h.includes('صحيح')) hukmClass = 'text-green';
+                if (h && (h.includes('ضعيف') || h.includes('موضوع'))) hukmClass = 'text-red';
+
+                addMetaItem('الحكم', Array.isArray(data.hukm) ? data.hukm.join(', ') : data.hukm, hukmClass);
+                addMetaItem('الراوي', Array.isArray(data.rawi) ? data.rawi.join(', ') : data.rawi, 'text-brown');
+                addMetaItem('المحدث', data.muhaddith, 'text-brown');
+                addMetaItem('رقم/صفحة', data.page_or_number, 'text-gray-500 font-mono');
+            }
+
+            // Populate Takhrij (Inside the meta/takhrij container)
+            if (takhrijSection && viewTakhrij) {
+                if (data.takhrij) {
+                    takhrijSection.classList.remove('hidden');
+                    viewTakhrij.textContent = data.takhrij;
+                } else {
+                    takhrijSection.classList.add('hidden');
+                }
+            }
+
+            // 3. Render Sharh
+            if (sharhSection && viewSharh) {
+                if (data.sharh) {
+                    sharhSection.classList.remove('hidden');
+                    renderParagraphs(viewSharh, data.sharh);
+                } else {
+                    sharhSection.classList.add('hidden');
+                }
+            }
+
+            // 4. Render Osoul (New)
+            if (osoulSection && viewOsoul) {
+                if (data.osoul) {
+                    osoulSection.classList.remove('hidden');
+                    renderParagraphs(viewOsoul, data.osoul);
+                } else {
+                    osoulSection.classList.add('hidden');
+                }
+            }
+
+            if (extraSections) extraSections.classList.remove('hidden');
+            updateFontSize();
+        }
+
+        function addMetaItem(label, value, valueClass = '') {
+            if (!value) return;
+            const div = document.createElement('div');
+            div.className = 'meta-item';
+            div.innerHTML = `<span class="meta-label">${label}:</span> <span class="meta-value ${valueClass}">${value}</span>`;
+            metaBar.appendChild(div);
+        }
+
+        function renderParagraphs(container, text) {
+            container.innerHTML = '';
+            if (!text) return;
+            const parts = text.split(/(?<=[.])\s+|\n+/);
+            parts.forEach(pText => {
+                const clean = pText.trim();
+                if (clean) {
+                    const p = document.createElement('p');
+                    p.textContent = clean;
+                    container.appendChild(p);
+                }
+            });
+        }
+
+        function openEdit() {
+            const password = prompt("الرجاء إدخال الرمز السري للتعديل:");
+            if (password !== "@") { if (password !== null) alert("الرمز السري غير صحيح!"); return; }
+            if (!currentData) return;
+
+            editFormBody.innerHTML = '';
+            createTextarea('نص الحديث', 'text', currentData.text, 6);
+            createInput('الراوي', 'rawi', currentData.rawi, true);
+            createInput('المحدث', 'muhaddith', currentData.muhaddith);
+            createInput('الحكم', 'hukm', currentData.hukm, true);
+            createInput('المصدر', 'source', currentData.source, true);
+            createTextarea('التخريج', 'takhrij', currentData.takhrij, 3);
+            createTextarea('الشرح', 'sharh', currentData.sharh, 6);
+            createTextarea('الأصول (Osoul)', 'osoul', currentData.osoul, 6); // New Field
+
+            editContainer.classList.add('active');
+        }
+
+        function createInput(label, key, value, isArray = false) {
+            const val = isArray && Array.isArray(value) ? value.join('، ') : (value || '');
+            const div = document.createElement('div');
+            div.className = 'form-group';
+            div.innerHTML = `<label class="form-label">${label}</label><input name="${key}" class="form-input" value="${val}" />`;
+            editFormBody.appendChild(div);
+        }
+
+        function createTextarea(label, key, value, rows = 4) {
+            const div = document.createElement('div');
+            div.className = 'form-group';
+            div.innerHTML = `<label class="form-label">${label}</label><textarea name="${key}" class="form-textarea" rows="${rows}">${value || ''}</textarea>`;
+            editFormBody.appendChild(div);
+        }
+
+        async function saveChanges() {
+            const saveBtn = document.getElementById('saveBtn');
+            const saveText = document.getElementById('saveText');
+            const saveSpinner = document.getElementById('saveSpinner');
+
+            saveBtn.disabled = true;
+            saveText.textContent = "...";
+            saveSpinner.classList.remove('hidden');
+
+            try {
+                const inputs = editFormBody.querySelectorAll('input, textarea');
+                const newData = {};
+                inputs.forEach(input => {
+                    const key = input.name;
+                    let val = input.value.trim();
+                    if (['rawi', 'hukm', 'source'].includes(key)) {
+                        val = val ? val.split('،').join(',').split(',').map(s => s.trim()).filter(Boolean) : [];
+                    }
+                    newData[key] = val;
+                });
+                newData.updatedAt = serverTimestamp();
+
+                await updateDoc(doc(db, CONFIG.collection, currentData.objectID), newData);
+                try { await algoliaIndex.saveObject({ objectID: currentData.objectID, ...newData }); } catch (e) { }
+
+                currentData = { ...currentData, ...newData };
+                renderView(currentData);
+                editContainer.classList.remove('active');
+            } catch (e) { alert("حدث خطأ أثناء الحفظ"); console.error(e); }
+            finally { saveBtn.disabled = false; saveText.textContent = "حفظ التغييرات"; saveSpinner.classList.add('hidden'); }
+        }
+
+        document.getElementById('editBtn').addEventListener('click', openEdit);
+        document.getElementById('cancelBtn').addEventListener('click', () => editContainer.classList.remove('active'));
+        document.getElementById('cancelBtnTop').addEventListener('click', () => editContainer.classList.remove('active'));
+        document.getElementById('saveBtn').addEventListener('click', saveChanges);
+
+        loadData();
+    </script>
+</body>
+
+</html>
