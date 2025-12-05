@@ -53,86 +53,80 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <div class="hero-section">
-    <div class="container-fluid">
-      <h1 class="hero-title">الموسوعة الإسلامية الشاملة</h1>
-      <p class="hero-subtitle">منصة موحدة للبحث في الحديث الشريف، التاريخ الإسلامي، وتراجم العلماء.</p>
-
-      <!-- Unified Search Section -->
-      <div class="search-container">
-        <div class="search-tabs">
-          <button class="search-tab active" data-target="all">الكل</button>
-          <button class="search-tab" data-target="hadith">الحديث</button>
-          <button class="search-tab" data-target="history">التاريخ</button>
-          <button class="search-tab" data-target="scholars">التراجم</button>
+  <main class="simple-shell">
+    <section class="search-stack">
+      <div class="stack-header">
+        <div>
+          <p class="eyebrow">محرك موحد</p>
+          <h1>ابحث في كل الأقسام من مكان واحد</h1>
+          <p class="lead">نتائج من الحديث، التراجم، التاريخ، الفتاوى وقاعدة Firebase مباشرة.</p>
         </div>
-
-        <form id="searchForm" class="search-input-wrapper">
-          <button type="submit" class="search-btn">
-            <i data-lucide="search" class="w-6 h-6"></i>
-          </button>
-          <input id="searchInput" type="text" class="search-input"
-            placeholder="ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)..." autocomplete="off">
-        </form>
+        <div class="stack-links">
+          <a href="hadith.html">الحديث</a>
+          <a href="scholars.html">التراجم</a>
+          <a href="history.html">التاريخ</a>
+          <a href="algolia-search.html">الفتاوى</a>
+          <a href="firebase-search.html">بحث Firebase</a>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <div class="container-fluid">
-
-    <!-- Loading State -->
-    <div id="loadingState" class="hidden text-center py-12">
-      <div class="w-10 h-10 border-4 border-[#3498db] border-t-transparent rounded-full animate-spin mx-auto"></div>
-      <p class="text-lg text-gray-500 mt-4">جاري البحث في المصادر...</p>
-    </div>
-
-    <!-- No Results State -->
-    <div id="noResultsState" class="hidden text-center py-12">
-      <div class="bg-gray-50 rounded-lg p-8 max-w-lg mx-auto">
-        <i data-lucide="search-x" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
-        <p class="text-xl font-bold text-gray-700 mb-2">لم يتم العثور على نتائج</p>
-        <p class="text-gray-500">حاول استخدام كلمات مختلفة أو تأكد من الإملاء.</p>
+      <div class="search-tabs">
+        <button class="search-tab active" data-target="all">الكل</button>
+        <button class="search-tab" data-target="hadith">الحديث</button>
+        <button class="search-tab" data-target="scholars">التراجم</button>
+        <button class="search-tab" data-target="history">التاريخ</button>
+        <button class="search-tab" data-target="fatawa">الفتاوى</button>
+        <button class="search-tab" data-target="firebase">Firebase</button>
       </div>
-    </div>
 
-    <!-- Search Results -->
-    <div id="resultsList" class="results-list hidden">
-      <!-- Injected Items -->
-    </div>
+      <form id="searchForm" class="search-input-wrapper search-input-wrapper--full">
+        <button type="submit" class="search-btn">
+          <i data-lucide="search" class="w-6 h-6"></i>
+        </button>
+        <input id="searchInput" type="text" class="search-input"
+          placeholder="ابحث في الموسوعة (مثلاً: البخاري، ابن تيمية، الزكاة)..." autocomplete="off">
+      </form>
+    </section>
 
-    <!-- Home dashboard sections removed as per user request -->
-    <div id="homeDashboard"></div>
-  </div>
+    <section class="results-panel results-panel--tight">
+      <div id="loadingState" class="hidden state-card">
+        <div class="spinner"></div>
+        <p>جاري البحث في المصادر...</p>
+      </div>
 
-  </div>
-  <div class="card animate-pulse">
-    <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
-    <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-  </div>
-  <div class="card animate-pulse">
-    <div class="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
-    <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-  </div>
-  </div>
-  </div>
+      <div id="noResultsState" class="hidden state-card">
+        <i data-lucide="search-x"></i>
+        <div>
+          <h3>لم يتم العثور على نتائج</h3>
+          <p>حاول استخدام كلمات مختلفة أو تأكد من الإملاء.</p>
+        </div>
+      </div>
 
-  <!-- Footer -->
-  <div class="text-center text-gray-400 text-sm py-10 border-t border-gray-200 mt-16">
+      <div id="resultsList" class="results-list hidden"></div>
+    </section>
+
+    <section class="quick-links">
+      <p>تحتاج واجهة متقدمة لكل قسم؟ اختر من هنا:</p>
+      <div class="quick-links__chips">
+        <a href="hadith.html">واجهة الحديث</a>
+        <a href="scholars.html">واجهة التراجم</a>
+        <a href="history.html">قارئ التاريخ</a>
+        <a href="algolia-search.html">موسوعة الفتاوى</a>
+        <a href="firebase-search.html">بحث Firebase فقط</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
     <p>&copy; 2025 الموسوعة الشاملة. جميع الحقوق محفوظة.</p>
-  </div>
-
-  </div>
+  </footer>
 
   <!-- Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, query, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import algoliasearch from 'https://cdn.jsdelivr.net/npm/algoliasearch@4.22.1/dist/algoliasearch-lite.esm.browser.js';
 
-    // --- Configuration ---
     const CONFIG = {
       hadith: {
         appId: '88G4AVERCC',
@@ -150,6 +144,11 @@
         apiKey: '981ea91e88c65be8aadf2113c207b9c5',
         indexName: 'trajum'
       },
+      fatawa: {
+        appId: '3XD12I7386',
+        apiKey: '89e8e132a05fdb02275f64dec8d14d05',
+        indexName: 'fatawa'
+      },
       firebase: {
         apiKey: "AIzaSyBYJ2pVoWJ5ednWOnnF2dOJ43MJvDi_8rw",
         authDomain: "hadeth-7baf7.firebaseapp.com",
@@ -157,105 +156,91 @@
         storageBucket: "hadeth-7baf7.firebasestorage.app",
         messagingSenderId: "401684715520",
         appId: "1:401684715520:web:297abdb6aee1fb3176a0e5"
+      },
+      scholarFirebase: {
+        apiKey: "AIzaSyBni4eUpBlMrBVr-I-_bTLDyYpdJgkBnpw",
+        authDomain: "islsm-9.firebaseapp.com",
+        projectId: "islsm-9",
+        storageBucket: "islsm-9.firebasestorage.app",
+        messagingSenderId: "940034885206",
+        appId: "1:940034885206:web:4013d7a5297f2ff7b41df7"
       }
     };
 
-    // Initialize Firebase
     const app = initializeApp(CONFIG.firebase);
     const db = getFirestore(app);
+    const scholarApp = initializeApp(CONFIG.scholarFirebase, "scholarApp");
+    const scholarDb = getFirestore(scholarApp);
 
-    // Initialize Algolia Clients
     const clients = {
       hadith: algoliasearch(CONFIG.hadith.appId, CONFIG.hadith.apiKey).initIndex(CONFIG.hadith.indexName),
       history: algoliasearch(CONFIG.history.appId, CONFIG.history.apiKey).initIndex(CONFIG.history.indexName),
-      scholars: algoliasearch(CONFIG.scholars.appId, CONFIG.scholars.apiKey).initIndex(CONFIG.scholars.indexName)
+      scholars: algoliasearch(CONFIG.scholars.appId, CONFIG.scholars.apiKey).initIndex(CONFIG.scholars.indexName),
+      fatawa: algoliasearch(CONFIG.fatawa.appId, CONFIG.fatawa.apiKey).initIndex(CONFIG.fatawa.indexName)
     };
 
-    // DOM Elements
     const searchForm = document.getElementById('searchForm');
     const searchInput = document.getElementById('searchInput');
     const searchTabs = document.querySelectorAll('.search-tab');
     const resultsList = document.getElementById('resultsList');
-    const homeDashboard = document.getElementById('homeDashboard');
     const loadingState = document.getElementById('loadingState');
     const noResultsState = document.getElementById('noResultsState');
 
+    const PLACEHOLDERS = {
+      all: "ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)...",
+      hadith: "ابحث في الأحاديث (مثلاً: إنما الأعمال بالنيات)...",
+      history: "ابحث في التاريخ (مثلاً: معركة بدر)...",
+      scholars: "ابحث عن عالم (مثلاً: ابن تيمية)...",
+      fatawa: "ابحث عن فتوى (مثلاً: زكاة الشركات)...",
+      firebase: "ابحث في قاعدة التراجم المخصصة..."
+    };
+
     let currentTab = 'all';
 
-    // --- Initialization ---
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      // Featured content removed as per user request
-
-      // Restore search state if available
       const lastResults = sessionStorage.getItem('lastSearchResults');
       const lastTerm = sessionStorage.getItem('lastSearchTerm');
       const lastTab = sessionStorage.getItem('lastActiveTab');
 
       if (lastResults && lastTerm) {
-        // Restore input
         searchInput.value = lastTerm;
-
-        // Restore tab
         if (lastTab) {
-          searchTabs.forEach(t => {
-            t.classList.remove('active');
-            if (t.dataset.target === lastTab) {
-              t.classList.add('active');
-            }
-          });
-          currentTab = lastTab;
-          const placeholders = {
-            all: "ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)...",
-            hadith: "ابحث في الأحاديث (مثلاً: إنما الأعمال بالنيات)...",
-            history: "ابحث في التاريخ (مثلاً: معركة بدر)...",
-            scholars: "ابحث عن عالم (مثلاً: ابن تيمية)..."
-          };
-          if (placeholders[lastTab]) {
-            searchInput.placeholder = placeholders[lastTab];
-          }
+          setActiveTab(lastTab);
         }
 
-        // Restore UI
-        homeDashboard.classList.add('hidden');
-        loadingState.classList.add('hidden');
-        noResultsState.classList.add('hidden');
-        resultsList.classList.remove('hidden');
-
-        // Render results
         try {
           const results = JSON.parse(lastResults);
-          renderResults(results);
+          if (results.length > 0) {
+            loadingState.classList.add('hidden');
+            noResultsState.classList.add('hidden');
+            resultsList.classList.remove('hidden');
+            renderResults(results);
+          }
         } catch (e) {
           console.error("Error parsing saved results:", e);
           sessionStorage.removeItem('lastSearchResults');
         }
       }
     });
-    // pageshow listener removed – allow browser back navigation to restore previous results
 
-    // --- Tab Switching ---
+    function setActiveTab(tab) {
+      searchTabs.forEach(t => t.classList.remove('active'));
+      const button = Array.from(searchTabs).find(btn => btn.dataset.target === tab);
+      if (button) button.classList.add('active');
+      currentTab = tab;
+      searchInput.placeholder = PLACEHOLDERS[tab] || PLACEHOLDERS.all;
+    }
+
     searchTabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        searchTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentTab = tab.dataset.target;
-
-        const placeholders = {
-          all: "ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)...",
-          hadith: "ابحث في الأحاديث (مثلاً: إنما الأعمال بالنيات)...",
-          history: "ابحث في التاريخ (مثلاً: معركة بدر)...",
-          scholars: "ابحث عن عالم (مثلاً: ابن تيمية)..."
-        };
-        searchInput.placeholder = placeholders[currentTab];
-
+        setActiveTab(tab.dataset.target);
         if (searchInput.value.trim()) {
           handleSearch(searchInput.value.trim());
         }
       });
     });
 
-    // --- Search Logic ---
     searchForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const term = searchInput.value.trim();
@@ -263,7 +248,6 @@
     });
 
     async function handleSearch(term) {
-      homeDashboard.classList.add('hidden');
       resultsList.innerHTML = '';
       resultsList.classList.add('hidden');
       noResultsState.classList.add('hidden');
@@ -273,21 +257,29 @@
         let results = [];
 
         if (currentTab === 'all') {
-          const [hadithRes, historyRes, scholarsRes] = await Promise.all([
+          const [hadithRes, historyRes, scholarsRes, fatawaRes, firebaseDocs] = await Promise.all([
             clients.hadith.search(term, { hitsPerPage: 5 }),
             clients.history.search(term, { hitsPerPage: 5 }),
-            clients.scholars.search(term, { hitsPerPage: 5 })
+            clients.scholars.search(term, { hitsPerPage: 5 }),
+            clients.fatawa.search(term, { hitsPerPage: 5 }),
+            searchFirebaseDocs(term, 5)
           ]);
 
           const hydratedHadith = await hydrateHadithResults(hadithRes.hits);
-
           results = [
             ...formatResults(hydratedHadith, 'hadith'),
             ...formatResults(scholarsRes.hits, 'scholars'),
-            ...formatResults(historyRes.hits, 'history')
+            ...formatResults(historyRes.hits, 'history'),
+            ...formatResults(fatawaRes.hits, 'fatawa'),
+            ...formatResults(firebaseDocs, 'firebase')
           ];
+        } else if (currentTab === 'firebase') {
+          const docs = await searchFirebaseDocs(term, 20);
+          results = formatResults(docs, 'firebase');
         } else {
-          const res = await clients[currentTab].search(term, { hitsPerPage: 20 });
+          const client = clients[currentTab];
+          if (!client) throw new Error('Client غير موجود');
+          const res = await client.search(term, { hitsPerPage: 20 });
           let hits = res.hits;
           if (currentTab === 'hadith') {
             hits = await hydrateHadithResults(hits);
@@ -299,13 +291,10 @@
 
         if (results.length === 0) {
           noResultsState.classList.remove('hidden');
-          // Clear saved results if no results found, but keep term/tab? 
-          // Better to save empty state so it persists
           sessionStorage.setItem('lastSearchResults', JSON.stringify([]));
         } else {
           resultsList.classList.remove('hidden');
           renderResults(results);
-          // Save state
           sessionStorage.setItem('lastSearchTerm', term);
           sessionStorage.setItem('lastActiveTab', currentTab);
           sessionStorage.setItem('lastSearchResults', JSON.stringify(results));
@@ -319,7 +308,6 @@
       }
     }
 
-    // --- Hydration Logic for Hadith ---
     async function hydrateHadithResults(hits) {
       const promises = hits.map(async (hit) => {
         try {
@@ -339,13 +327,15 @@
 
     function formatResults(hits, type) {
       return hits.map(hit => {
-        let title, snippet, link, meta;
+        let title = '';
+        let snippet = '';
+        let link = '#';
+        let meta = '';
 
         if (type === 'hadith') {
           title = hit.text ? hit.text.substring(0, 100) + "..." : "حديث شريف";
           snippet = hit.text || "";
           link = `details_hadith.html?id=${hit.objectID}`;
-
           let hukmBadge = '';
           if (hit.hukm) {
             const h = Array.isArray(hit.hukm) ? hit.hukm[0] : hit.hukm;
@@ -354,11 +344,8 @@
             if (h.includes('ضعيف') || h.includes('موضوع')) colorClass = 'badge-danger';
             hukmBadge = `<span class="badge ${colorClass}">${h}</span>`;
           }
-
           const source = hit.source ? (Array.isArray(hit.source) ? hit.source[0] : hit.source) : '';
           const rawi = hit.rawi ? (Array.isArray(hit.rawi) ? hit.rawi[0] : hit.rawi) : '';
-
-          // Construct Meta with Narrator
           meta = `
             <div class="flex flex-wrap gap-2 items-center">
                 ${hukmBadge}
@@ -366,19 +353,32 @@
                 ${rawi ? `<span class="text-xs text-brown font-bold">الراوي: ${rawi}</span>` : ''}
             </div>
           `;
-
         } else if (type === 'scholars') {
-          title = hit.name;
+          title = hit.name || "بطاقة تراجم";
           snippet = hit.trj ? hit.trj.substring(0, 200) + "..." : "";
-          link = `details_scholars.html?id=${hit.objectID}`;
+          const docId = hit.objectID || hit.id;
+          link = `details_scholars.html?id=${docId}`;
           meta = `<span class="badge badge-info">تراجم</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
         } else if (type === 'history') {
           title = hit.name || "بدون عنوان";
-          // Use full_intro or text for snippet
           const content = hit.full_intro || hit.text || "";
           snippet = content.substring(0, 200) + "...";
           link = `history.html?id=${hit.objectID}`;
           meta = `<span class="badge badge-warning">تاريخ</span>`;
+        } else if (type === 'fatawa') {
+          title = hit.question || "فتوى";
+          const answerPreview = hit.answer || hit.text || "";
+          snippet = answerPreview.substring(0, 220) + "...";
+          const targetId = hit.objectID || hit.id;
+          link = `algolia-search.html#/fatwa/${targetId}`;
+          meta = `<span class="badge badge-info">فتوى</span> ${hit.source ? hit.source.replace('.html', '') : ''}`;
+        } else if (type === 'firebase') {
+          title = hit.name || "سيرة معرفية";
+          const content = hit.trj || hit.summary || "";
+          snippet = content.substring(0, 220) + "...";
+          const docId = hit.id || hit.objectID;
+          link = `details_scholars.html?id=${docId}`;
+          meta = `<span class="badge badge-success">قاعدة Firebase</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
         }
 
         return { type, title, snippet, link, meta, raw: hit };
@@ -386,6 +386,7 @@
     }
 
     function renderResults(results) {
+      resultsList.innerHTML = '';
       results.forEach(item => {
         const div = document.createElement('div');
         div.className = 'result-item';
@@ -400,8 +401,21 @@
       });
     }
 
-    // --- Featured Content Logic ---
-    // Featured Content Logic removed
+    async function searchFirebaseDocs(term, size = 10) {
+      if (!term) return [];
+      const trimmed = term.trim();
+      const colRef = collection(scholarDb, "scholars_biographies");
+      let snapshot = await getDocs(query(colRef, where("aliases", "array-contains", trimmed), limit(size)));
+
+      if (snapshot.empty && trimmed.includes(' ')) {
+        const fallback = trimmed.split(' ')[0];
+        if (fallback.length >= 3) {
+          snapshot = await getDocs(query(colRef, where("aliases", "array-contains", fallback), limit(size)));
+        }
+      }
+
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
 
   </script>
 </body>
