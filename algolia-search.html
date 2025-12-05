@@ -486,7 +486,7 @@
             detailAnswer.innerHTML = formatAnswer(full.answer || '');
           }
         } catch (err) {
-          detailAnswer.innerHTML = 'تعذر تحميل الجواب الكامل.';
+        detailAnswer.innerHTML = 'تعذر تحميل الجواب الكامل.';
           console.error(err);
         }
       } else {
@@ -503,6 +503,17 @@
 
     async function fetchFatwaById(id) {
       if (!id) throw new Error('missing id');
+
+      // Try Algolia object first for دقة وسرعة
+      try {
+        const algoliaObj = await index.getObject(id);
+        if (algoliaObj) {
+          return normalizeHit(algoliaObj);
+        }
+      } catch (err) {
+        // ignore – ربما objectID مختلف أو غير موجود
+      }
+
       const lookupCandidates = [];
       if (/^\d+$/.test(id)) {
         lookupCandidates.push(`${ORACLE_BASE}fatwa_${id}.html`);
