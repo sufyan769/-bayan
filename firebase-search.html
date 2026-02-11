@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>بحث التراجم - Firebase فقط</title>
+  <title>بحث التراجم - موسوعة البيان</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,6 +59,7 @@
     .line-clamp-3 {
       display: -webkit-box;
       -webkit-line-clamp: 3;
+      line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -72,7 +73,7 @@
     <div class="nav-container">
       <a href="index.html" class="nav-logo">
         <i data-lucide="library"></i>
-        <span>الموسوعة الشاملة</span>
+        <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span class="brand-accent">البيان</span></span>
       </a>
       <div class="nav-links">
         <a href="index.html?tab=hadith" class="nav-link">
@@ -85,7 +86,7 @@
         </a>
         <a href="history.html" class="nav-link">
           <i data-lucide="scroll" class="w-4 h-4"></i>
-          البداية والنهاية
+          سير الأعلام
         </a>
         <a href="algolia-search.html" class="nav-link">
           <i data-lucide="book" class="w-4 h-4"></i>
@@ -103,7 +104,8 @@
   <nav class="border-b border-[#a2a9b1] bg-[#f8f9fa] mb-6">
     <div class="max-w-5xl mx-auto px-4 h-16 flex items-center gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-serif font-bold text-xl">
+        <div
+          class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-serif font-bold text-xl">
           و
         </div>
         <div class="flex flex-col leading-tight">
@@ -155,7 +157,8 @@
       <!-- Featured Section -->
       <div id="featuredSection">
         <div class="bg-[#f8f9fa] border border-[#a2a9b1] p-1 mb-4">
-          <h2 class="text-xl font-serif bg-white border-b border-[#a2a9b1] px-4 py-2 font-bold text-[#202122] flex items-center gap-2">
+          <h2
+            class="text-xl font-serif bg-white border-b border-[#a2a9b1] px-4 py-2 font-bold text-[#202122] flex items-center gap-2">
             <i data-lucide="star" class="w-4 h-4 text-yellow-600 fill-yellow-600"></i>
             مختارات من التراجم
           </h2>

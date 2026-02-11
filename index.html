@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>الموسوعة الشاملة - الرئيسية</title>
+  <title>موسوعة البيان - الرئيسية</title>
   <meta name="description"
     content="محرك بحث موحد يجمع الحديث الشريف، الفتاوى، التراجم، التاريخ وقواعد البيانات الإسلامية في واجهة واحدة.">
   <meta name="keywords"
-    content="حديث شريف, فتاوى, تراجم العلماء, البداية والنهاية, موسوعة إسلامية, بحث شرعي, اسلام ويب, الدرر السنية">
+    content="حديث شريف, فتاوى, تراجم العلماء, سير الأعلام, موسوعة إسلامية, بحث شرعي, اسلام ويب, الدرر السنية">
   <link rel="canonical" href="https://sufyan769.github.io/-bayan/" />
   <meta property="og:type" content="website">
   <meta property="og:title" content="الموسوعة الشاملة - بحث إسلامي موحد">
@@ -54,20 +54,25 @@
     <div class="nav-container">
       <a href="index.html" class="nav-logo">
         <i data-lucide="library"></i>
-        <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span class="brand-accent">بيان</span></span>
+        <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span class="brand-accent">البيان</span></span>
       </a>
       <div class="nav-links">
         <a href="index.html?tab=hadith" class="nav-link" data-nav-tab="hadith">
           <i data-lucide="book-open-check" class="w-4 h-4"></i>
           الحديث الشريف
         </a>
+
         <a href="index.html?tab=scholars" class="nav-link" data-nav-tab="scholars">
           <i data-lucide="users" class="w-4 h-4"></i>
           تراجم العلماء
         </a>
         <a href="index.html?tab=history" class="nav-link" data-nav-tab="history">
           <i data-lucide="scroll" class="w-4 h-4"></i>
-          البداية والنهاية
+          سير الأعلام
+        </a>
+        <a href="index.html?tab=jarh" class="nav-link" data-nav-tab="jarh">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          الجرح والتعديل
         </a>
         <a href="index.html?tab=fatawa" class="nav-link" data-nav-tab="fatawa">
           <i data-lucide="book" class="w-4 h-4"></i>
@@ -87,7 +92,8 @@
         <button class="search-tab active" data-target="all">الكل</button>
         <button class="search-tab" data-target="hadith">الحديث</button>
         <button class="search-tab" data-target="scholars">التراجم</button>
-        <button class="search-tab" data-target="history">التاريخ</button>
+        <button class="search-tab" data-target="history">سير الأعلام</button>
+        <button class="search-tab" data-target="jarh">الجرح والتعديل</button>
         <button class="search-tab" data-target="fatawa">الفتاوى</button>
         <button class="search-tab" data-target="firebase">Firebase</button>
       </div>
@@ -142,7 +148,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>&copy; 2025 الموسوعة الشاملة. جميع الحقوق محفوظة.</p>
+    <p>&copy; 2025 موسوعة البيان. جميع الحقوق محفوظة.</p>
   </footer>
 
   <!-- Logic -->
@@ -188,6 +194,14 @@
         storageBucket: "islsm-9.firebasestorage.app",
         messagingSenderId: "940034885206",
         appId: "1:940034885206:web:4013d7a5297f2ff7b41df7"
+      },
+      jarhFirebase: {
+        apiKey: "AIzaSyBjkJ45NsQgz1c7V1mUsnrORMYx8WceDdQ",
+        authDomain: "trajum-almaktaba.firebaseapp.com",
+        projectId: "trajum-almaktaba",
+        storageBucket: "trajum-almaktaba.firebasestorage.app",
+        messagingSenderId: "589922811454",
+        appId: "1:589922811454:web:b038cd26b4f02048cadb6f"
       }
     };
 
@@ -202,6 +216,8 @@
     const db = getFirestore(app);
     const scholarApp = initializeApp(CONFIG.scholarFirebase, "scholarApp");
     const scholarDb = getFirestore(scholarApp);
+    const jarhApp = initializeApp(CONFIG.jarhFirebase, "jarhApp");
+    const jarhDb = getFirestore(jarhApp);
 
     const clients = {
       hadith: algoliasearch(CONFIG.hadith.appId, CONFIG.hadith.apiKey).initIndex(CONFIG.hadith.indexName),
@@ -222,8 +238,9 @@
     const PLACEHOLDERS = {
       all: "ابحث في الموسوعة (مثلاً: البخاري، عمر بن الخطاب)...",
       hadith: "ابحث في الأحاديث (مثلاً: إنما الأعمال بالنيات)...",
-      history: "ابحث في التاريخ (مثلاً: معركة بدر)...",
+      history: "ابحث في سير الأعلام (مثلاً: معركة بدر)...",
       scholars: "ابحث عن عالم (مثلاً: ابن تيمية)...",
+      jarh: "ابحث في الجرح والتعديل (مثلاً: يحيى بن معين)...",
       fatawa: "ابحث عن فتوى (مثلاً: زكاة الشركات)...",
       firebase: "ابحث في قاعدة التراجم المخصصة..."
     };
@@ -365,11 +382,15 @@
             ...formatResults(scholarsRes.hits, 'scholars'),
             ...formatResults(historyRes.hits, 'history'),
             ...formatResults(fatawaRes.hits, 'fatawa'),
-            ...formatResults(firebaseDocs, 'firebase')
+            ...formatResults(firebaseDocs, 'firebase'),
+            ...formatResults(await searchJarhDocs(term, 5), 'jarh')
           ];
         } else if (currentTab === 'firebase') {
           const docs = await searchFirebaseDocs(term, 20);
           results = formatResults(docs, 'firebase');
+        } else if (currentTab === 'jarh') {
+          const docs = await searchJarhDocs(term, 20);
+          results = formatResults(docs, 'jarh');
         } else {
           const client = clients[currentTab];
           if (!client) throw new Error('Client غير موجود');
@@ -460,7 +481,7 @@
           const content = hit.full_intro || hit.text || "";
           snippet = content.substring(0, 200) + "...";
           link = `history.html?id=${hit.objectID}`;
-          meta = `<span class="badge badge-warning">تاريخ</span>`;
+          meta = `<span class="badge badge-warning">سير الأعلام</span>`;
         } else if (type === 'fatawa') {
           const fatwaId = hit.objectID || hit.id || '';
           title = stripPlaceholderDomain(hit.question || "فتوى");
@@ -475,6 +496,11 @@
           const docId = hit.id || hit.objectID;
           link = `details_scholars.html?id=${docId}`;
           meta = `<span class="badge badge-success">قاعدة Firebase</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
+        } else if (type === 'jarh') {
+          title = hit['الاسم'] || "راوي بدون اسم";
+          snippet = `رتبة ابن حجر: ${hit['الرتبة عند ابن حجر'] || '-'} | رتبة الذهبي: ${hit['الرتبة عند الذهبي'] || '-'}`;
+          link = `details_jarh.html?id=${hit.id || hit.objectID}`;
+          meta = `<span class="badge badge-warning">الجرح والتعديل</span>`;
         }
 
         return { type, title, snippet, link, meta, raw: hit };
@@ -513,6 +539,21 @@
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
 
+    async function searchJarhDocs(term, size = 10) {
+      if (!term) return [];
+      const trimmed = term.trim();
+      const colRef = collection(jarhDb, "scholars"); // Collection name changed to 'scholars'
+      let snapshot = await getDocs(query(colRef, where("الاسم", ">=", trimmed), where("الاسم", "<=", trimmed + '\uf8ff'), limit(size)));
+
+      // Fallback for numeric ID
+      if (snapshot.empty && !isNaN(trimmed)) {
+        const numSnap = await getDocs(query(colRef, where("id", "==", Number(trimmed)), limit(1)));
+        return numSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
     function normalizeResultUrl(url) {
       if (!url) return '';
       try {
@@ -535,10 +576,23 @@
       if (!featuredFatwasEl || !featuredScholarsEl) return;
       renderCuratedPlaceholder(featuredFatwasEl, 'جاري تحميل الفتاوى...');
       renderCuratedPlaceholder(featuredScholarsEl, 'جاري تحميل التراجم...');
+
+      // Random page between 0 and 50 to show different results
+      const randomPageFatwa = Math.floor(Math.random() * 50);
+      const randomPageScholar = Math.floor(Math.random() * 50);
+
       try {
         const [fatwaRes, scholarRes] = await Promise.all([
-          clients.fatawa.search('', { hitsPerPage: 5, attributesToRetrieve: ['question', 'source', 'objectID', 'id'] }),
-          clients.scholars.search('', { hitsPerPage: 5, attributesToRetrieve: ['name', 'death', 'trj', 'objectID', 'id'] })
+          clients.fatawa.search('', {
+            hitsPerPage: 5,
+            page: randomPageFatwa,
+            attributesToRetrieve: ['question', 'source', 'objectID', 'id']
+          }),
+          clients.scholars.search('', {
+            hitsPerPage: 5,
+            page: randomPageScholar,
+            attributesToRetrieve: ['name', 'death', 'trj', 'objectID', 'id']
+          })
         ]);
         renderCuratedFatwas(fatwaRes.hits || []);
         renderCuratedScholars(scholarRes.hits || []);

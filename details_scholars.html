@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>تفاصيل العالم</title>
+    <title>تفاصيل العالم - موسوعة البيان</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -20,7 +20,8 @@
         <div class="nav-container">
             <a href="index.html" class="nav-logo">
                 <i data-lucide="library"></i>
-                <span>الموسوعة الشاملة</span>
+                <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
+                        class="brand-accent">البيان</span></span>
             </a>
             <div class="nav-links">
                 <a href="index.html?tab=hadith" class="nav-link">
@@ -33,7 +34,7 @@
                 </a>
                 <a href="history.html" class="nav-link">
                     <i data-lucide="scroll" class="w-4 h-4"></i>
-                    البداية والنهاية
+                    سير الأعلام
                 </a>
                 <a href="algolia-search.html" class="nav-link">
                     <i data-lucide="book" class="w-4 h-4"></i>
@@ -279,7 +280,7 @@
                     const key = input.name;
                     let val = input.value.trim();
                     if (key === 'aliases') {
-                         val = val ? val.split('،').join(',').split(',').map(s => s.trim()).filter(Boolean) : [];
+                        val = val ? val.split('،').join(',').split(',').map(s => s.trim()).filter(Boolean) : [];
                     }
                     newData[key] = val;
                 });

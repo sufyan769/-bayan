@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>البداية والنهاية - التاريخ الكبير</title>
+    <title>سير الأعلام - موسوعة البيان</title>
 
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -96,7 +96,8 @@
         <div class="nav-container">
             <a href="index.html" class="nav-logo">
                 <i data-lucide="library"></i>
-                <span>الموسوعة الشاملة</span>
+                <span class="brand-mark"><span class="brand-slate">موسوعة</span> <span
+                        class="brand-accent">البيان</span></span>
             </a>
             <div class="nav-links">
                 <a href="index.html?tab=hadith" class="nav-link">
@@ -109,7 +110,7 @@
                 </a>
                 <a href="history.html" class="nav-link active">
                     <i data-lucide="scroll" class="w-4 h-4"></i>
-                    البداية والنهاية
+                    سير الأعلام
                 </a>
                 <a href="algolia-search.html" class="nav-link">
                     <i data-lucide="book" class="w-4 h-4"></i>
@@ -290,7 +291,7 @@
                             type="search"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.currentTarget.value)}
-                            placeholder="ابحث في الموسوعة التاريخية..."
+                            placeholder="ابحث في سير الأعلام..."
                             className="search-input"
                         />
                         <button type="submit" className="search-btn">
@@ -355,7 +356,7 @@
             return (
                 <article className="result-item cursor-pointer" onClick={onClick}>
                     <div className="result-meta mb-2">
-                        <span className="badge badge-warning">تاريخ</span>
+                        <span className="badge badge-warning">سير الأعلام</span>
                         <span className="text-xs text-gray-500">{hit.name}</span>
                         {hit.part_number && <span className="text-xs text-gray-400">• جزء {hit.part_number} صفحة {hit.page_number}</span>}
                     </div>
@@ -559,7 +560,7 @@
 
                     if (currentChunk === 1) {
                         // At chunk 1, try to load previous character
-                            const prevId = currentId - 1;
+                        const prevId = currentId - 1;
                         if (prevId < 1) {
                             // Already at the very first character - do nothing
                             return;
@@ -643,12 +644,12 @@
                         <div className="article-header">
                             <h2 className="article-title">{currentHit.name || currentHit.book_title}</h2>
                             <div className="meta-bar">
-                        {currentHit && allChunks.length > 0 && (
-                            <div className="meta-item">
-                                <span className="meta-label">مقطع:</span>
-                                <span className="meta-value">{extractChunkNumber(currentHit)} من {allChunks.length}</span>
-                            </div>
-                        )}
+                                {currentHit && allChunks.length > 0 && (
+                                    <div className="meta-item">
+                                        <span className="meta-label">مقطع:</span>
+                                        <span className="meta-value">{extractChunkNumber(currentHit)} من {allChunks.length}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -763,7 +764,7 @@
                         {!hasSearched ? (
                             <div className="py-20 text-center text-gray-500">
                                 <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                                <p className="text-xl mb-2 font-serif">مرحباً بك في الموسوعة التاريخية</p>
+                                <p className="text-xl mb-2 font-serif">مرحباً بك في سير الأعلام</p>
                                 <p className="text-sm">اكتب كلمة البحث في الصندوق أعلاه للبدء في استكشاف آلاف الصفحات.</p>
                             </div>
                         ) : uniqueHits.length === 0 ? (
