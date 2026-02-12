@@ -664,11 +664,9 @@ mark,
 .ais-Snippet-highlighted,
 .highlight-red {
     color: #dc2626 !important;
-    background-color: rgba(254, 202, 202, 0.2);
+    background-color: transparent;
     font-style: normal;
     font-weight: 700;
-    border-radius: 2px;
-    padding: 0 2px;
     text-decoration: none;
 }
 

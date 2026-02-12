@@ -467,28 +467,44 @@
         let meta = '';
 
         if (type === 'hadith') {
-          title = getHighlighted(hit, 'text', hit.text ? hit.text.substring(0, 100) + "..." : "حديث شريف");
-          snippet = getHighlighted(hit, 'text', hit.text || "");
-          link = `details_hadith.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
-          let hukmBadge = '';
+          // Show hadith text as the main content (title)
+          title = getHighlighted(hit, 'text', hit.text || "حديث شريف");
+
+          // Build metadata snippet instead of repeating hadith text
+          const rawi = hit.rawi ? (Array.isArray(hit.rawi) ? hit.rawi.join(', ') : hit.rawi) : '';
+          const muhaddith = hit.muhaddith || '';
+          const source = hit.source ? (Array.isArray(hit.source) ? hit.source.join(', ') : hit.source) : '';
+          const pageNum = hit.page_or_number || '';
+
+          let hukmText = '';
+          let hukmColor = '#6b7280'; // default gray
           if (hit.hukm) {
             const h = Array.isArray(hit.hukm) ? hit.hukm[0] : hit.hukm;
-            let colorClass = 'badge-info';
-            if (h.includes('صحيح')) colorClass = 'badge-success';
-            if (h.includes('ضعيف') || h.includes('موضوع')) colorClass = 'badge-danger';
-            hukmBadge = `<span class="badge ${colorClass}">${h}</span>`;
+            hukmText = h;
+
+            // Assign specific colors for each hukm
+            if (h.includes('صحيح')) {
+              hukmColor = '#16a34a'; // green for sahih
+            } else if (h.includes('حسن')) {
+              hukmColor = '#2563eb'; // blue for hasan
+            } else if (h.includes('ضعيف')) {
+              hukmColor = '#ea580c'; // orange for da'eef
+            } else if (h.includes('موضوع')) {
+              hukmColor = '#dc2626'; // red for mawdoo
+            }
           }
-          const source = hit.source ? (Array.isArray(hit.source) ? hit.source[0] : hit.source) : '';
-          const rawi = hit.rawi ? (Array.isArray(hit.rawi) ? hit.rawi[0] : hit.rawi) : '';
-          const takhrij = hit.takhrij ? (Array.isArray(hit.takhrij) ? hit.takhrij[0] : hit.takhrij) : '';
-          meta = `
-            <div class="flex flex-wrap gap-2 items-center">
-                ${hukmBadge}
-                ${source ? `<span class="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">${source}</span>` : ''}
-                ${rawi ? `<span class="text-xs text-brown font-bold">الراوي: ${rawi}</span>` : ''}
-                ${takhrij ? `<span class="text-xs text-gray-500">التخريج: ${takhrij}</span>` : ''}
-            </div>
-          `;
+
+          // Create metadata snippet with colors
+          const metaParts = [];
+          if (rawi) metaParts.push(`<strong style="color: #8d6e63;">الراوي:</strong> <span style="color: #8d6e63;">${rawi}</span>`);
+          if (hukmText) metaParts.push(`<strong style="color: ${hukmColor};">الحكم:</strong> <span style="color: ${hukmColor}; font-weight: bold;">${hukmText}</span>`);
+          if (muhaddith) metaParts.push(`<strong style="color: #8d6e63;">المحدث:</strong> <span style="color: #8d6e63;">${muhaddith}</span>`);
+          if (source) metaParts.push(`<strong style="color: #8d6e63;">المصدر:</strong> <span style="color: #8d6e63;">${source}</span>`);
+          if (pageNum) metaParts.push(`<strong style="color: #8d6e63;">رقم/صفحة:</strong> <span style="color: #8d6e63;">${pageNum}</span>`);
+
+          snippet = metaParts.length > 0 ? metaParts.join(' • ') : '';
+          link = `details_hadith.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
+          meta = `<span class="badge badge-info">حديث</span>`;
         } else if (type === 'scholars') {
           title = getHighlighted(hit, 'name', hit.name || "بطاقة تراجم");
           snippet = getHighlighted(hit, 'trj', hit.trj ? hit.trj.substring(0, 200) + "..." : "");
