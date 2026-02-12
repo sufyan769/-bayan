@@ -657,6 +657,21 @@ body {
     line-height: 1.9;
 }
 
+/* Global Highlight Styles */
+em,
+mark,
+.ais-Highlight-highlighted,
+.ais-Snippet-highlighted,
+.highlight-red {
+    color: #dc2626 !important;
+    background-color: rgba(254, 202, 202, 0.2);
+    font-style: normal;
+    font-weight: 700;
+    border-radius: 2px;
+    padding: 0 2px;
+    text-decoration: none;
+}
+
 /* Details Page / Reader View (Unified & Full Width) */
 .reader-body {
     background-color: var(--bg-color);
@@ -953,7 +968,7 @@ body {
     line-height: 1.6;
 }
 
- .similar-card p {
+.similar-card p {
     margin: 0;
     font-size: 0.9rem;
     color: var(--secondary-text);

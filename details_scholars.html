@@ -130,6 +130,7 @@
 
         const params = new URLSearchParams(window.location.search);
         const docId = params.get("id");
+        const searchTerm = params.get("q");
 
         const app = initializeApp(CONFIG.firebase, 'scholarsApp');
         const db = getFirestore(app);
@@ -192,9 +193,49 @@
 
                 currentData = data;
                 renderView(data);
+
+                if (searchTerm) {
+                    setTimeout(() => {
+                        highlightTerms(viewText, searchTerm);
+                        highlightTerms(viewTitle, searchTerm);
+                    }, 100);
+                }
+
                 loadingSpinner.classList.add('hidden');
                 viewContainer.classList.remove('hidden');
             } catch (e) { console.error(e); loadingSpinner.innerHTML = "<p class='text-red-500'>حدث خطأ في التحميل</p>"; }
+        }
+
+        function highlightTerms(element, term) {
+            if (!term || !element) return;
+            const terms = term.split(/\s+/).filter(t => t.length > 2);
+            if (terms.length === 0) return;
+            const regex = new RegExp(`(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            const nodes = [];
+            let node;
+            while (node = walker.nextNode()) nodes.push(node);
+
+            nodes.forEach(textNode => {
+                const text = textNode.nodeValue;
+                if (regex.test(text)) {
+                    const fragment = document.createDocumentFragment();
+                    let lastIndex = 0;
+                    text.replace(regex, (match, p1, offset) => {
+                        fragment.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
+                        const span = document.createElement('span');
+                        span.style.color = '#dc2626';
+                        span.style.fontWeight = 'bold';
+                        span.textContent = match;
+                        fragment.appendChild(span);
+                        lastIndex = offset + match.length;
+                        return match;
+                    });
+                    fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+                    textNode.parentNode.replaceChild(fragment, textNode);
+                }
+            });
         }
 
         function renderView(data) {

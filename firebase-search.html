@@ -63,6 +63,11 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+
+    .highlight-red {
+      color: #dc2626;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -370,6 +375,9 @@
       resultsList.classList.remove("hidden");
       resultsList.innerHTML = '<h2 class="text-2xl font-serif border-b border-[#a2a9b1] pb-2 mb-4">نتائج البحث</h2>';
 
+      const term = input.value.trim();
+      const regex = term ? new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi') : null;
+
       docs.forEach(doc => {
         const div = document.createElement('div');
         div.className = "mb-4 pb-4 border-b border-stone-100 last:border-0";
@@ -377,17 +385,25 @@
         let excerpt = "";
         if (doc.trj) excerpt = doc.trj.substring(0, 150) + "...";
 
+        let nameHtml = doc.name;
+        let excerptHtml = excerpt;
+
+        if (regex) {
+          nameHtml = nameHtml.replace(regex, '<span class="highlight-red">$1</span>');
+          excerptHtml = excerptHtml.replace(regex, '<span class="highlight-red">$1</span>');
+        }
+
         div.innerHTML = `
           <div class="mb-1">
-            <a href="details_scholars.html?id=${doc.id}" class="text-xl text-[#3366cc] hover:underline font-serif font-bold">
-              ${doc.name}
+            <a href="details_scholars.html?id=${doc.id}&q=${encodeURIComponent(term)}" class="text-xl text-[#3366cc] hover:underline font-serif font-bold">
+              ${nameHtml}
             </a>
           </div>
           <div class="text-sm text-[#54595d] mb-1">
             ${doc.death ? `توفي سنة: ${doc.death}` : ''}
           </div>
           <p class="text-sm text-[#202122] line-clamp-2">
-            ${excerpt}
+            ${excerptHtml}
           </p>
         `;
 

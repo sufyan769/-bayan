@@ -171,6 +171,7 @@
 
     const params = new URLSearchParams(window.location.search);
     const requestedId = params.get('id');
+    const searchTerm = params.get('q') || '';
     let currentFontSize = 24;
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -260,6 +261,57 @@
           }, 1500);
         });
       };
+
+      if (searchTerm) {
+        setTimeout(() => {
+          highlightTerms(fatwaQuestion, searchTerm);
+          highlightTerms(fatwaAnswer, searchTerm);
+        }, 100);
+      }
+    }
+
+    function highlightTerms(element, term) {
+      if (!term || !element) return;
+
+      const terms = term.split(/\s+/).filter(t => t.length > 2);
+      if (terms.length === 0) return;
+
+      // Create a regex that matches any of the terms, case insensitive
+      const regex = new RegExp(`(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+      const nodes = [];
+      let node;
+      while (node = walker.nextNode()) {
+        nodes.push(node);
+      }
+
+      nodes.forEach(textNode => {
+        const text = textNode.nodeValue;
+        if (regex.test(text)) {
+          const fragment = document.createDocumentFragment();
+          let lastIndex = 0;
+          text.replace(regex, (match, p1, offset) => {
+            // Append text before match
+            fragment.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
+
+            // Append highlighted match
+            const span = document.createElement('span');
+            span.style.color = '#dc2626'; // Red
+            span.style.fontWeight = 'bold';
+            span.textContent = match;
+            fragment.appendChild(span);
+
+            lastIndex = offset + match.length;
+            return match;
+          });
+
+          // Append remaining text
+          fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+
+          textNode.parentNode.replaceChild(fragment, textNode);
+        }
+      });
     }
 
     function buildMeta(data) {

@@ -457,7 +457,30 @@
             const [allChunks, setAllChunks] = useState([initialHit]); // Initialize with initialHit
             const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
             const [highlightIndex, setHighlightIndex] = useState(null);
+
             const contentRef = useRef(null);
+
+            // Read query param
+            const queryParams = new URLSearchParams(window.location.search);
+            const searchTerm = queryParams.get('q');
+
+            const highlightReactText = (text, query) => {
+                if (!query || !text) return text;
+                const terms = query.split(/\s+/).filter(t => t.length > 2);
+                if (!terms.length) return text;
+
+                const pattern = `(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`;
+                // Use a check regex to verify if part matches any term
+                const checkRegex = new RegExp(pattern, 'i');
+                const splitRegex = new RegExp(pattern, 'gi');
+
+                return text.split(splitRegex).map((part, i) => {
+                    if (checkRegex.test(part)) {
+                        return <span key={i} className="highlight-red" style={{ color: '#dc2626', fontWeight: 'bold' }}>{part}</span>;
+                    }
+                    return part;
+                });
+            };
 
             // Fetch all chunks for this character on mount
             useEffect(() => {
@@ -628,7 +651,7 @@
                         {lines.map((line, index) => {
                             const trimmedLine = line.trim();
                             if (!trimmedLine) return null;
-                            return <p key={index} className="mb-4 block">{trimmedLine}</p>;
+                            return <p key={index} className="mb-4 block">{highlightReactText(trimmedLine, searchTerm)}</p>;
                         })}
                     </div>
                 );

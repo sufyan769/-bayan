@@ -18,6 +18,15 @@
       background: #f8fafc;
     }
 
+    em {
+      color: #dc2626;
+      font-style: normal;
+      font-weight: 700;
+      background: rgba(254, 202, 202, 0.2);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
     .fatwa-results {
       display: flex;
       flex-direction: column;
@@ -283,7 +292,13 @@
     const stripPlaceholderDomain = (value = '') => value ? value.split(PLACEHOLDER_DOMAIN).join('') : '';
     const hasHTMLMarkup = (value = '') => /<\/?[a-z][\s\S]*>/i.test(value);
 
-    const buildFatwaDetailUrl = (id) => id ? `${FATWA_PAGE}?id=${encodeURIComponent(id)}` : '#';
+    const buildFatwaDetailUrl = (id, query = '') => {
+      let url = id ? `${FATWA_PAGE}?id=${encodeURIComponent(id)}` : '#';
+      if (query && id) {
+        url += `&q=${encodeURIComponent(query)}`;
+      }
+      return url;
+    };
 
     const rewriteFatwaHref = (href = '') => {
       if (!href) return href;
@@ -340,7 +355,7 @@
       try {
         const options = {
           hitsPerPage: 20,
-          attributesToSnippet: ['answer_snippet:120'],
+          attributesToSnippet: ['answer_snippet:120', 'answer:120', 'text:120'],
           advancedSyntax: true,
           removeWordsIfNoResults: 'lastWords',
           ignorePlurals: true,
@@ -379,11 +394,23 @@
         if (match && match[1]) id = match[1];
       }
       if (!id && hit.source) id = hit.source;
-      const snippet = hit.answer_snippet || hit.answer || hit.text || '';
+      const snippet = hit._snippetResult?.answer_snippet?.value ||
+        hit._snippetResult?.answer?.value ||
+        hit._snippetResult?.text?.value ||
+        hit.answer_snippet ||
+        hit.answer ||
+        hit.text || '';
+
+      const question = hit._highlightResult?.question?.value ||
+        hit._highlightResult?.title?.value ||
+        hit.question ||
+        hit.title ||
+        'سؤال بدون عنوان';
+
       const source = hit.source || '';
       return {
         id,
-        question: stripPlaceholderDomain(hit.question || hit.title || 'سؤال بدون عنوان'),
+        question: stripPlaceholderDomain(question),
         snippet: stripPlaceholderDomain(snippet),
         source,
         raw: hit
@@ -430,11 +457,12 @@
         article.querySelectorAll('.fatwa-chip').forEach(chip => {
           chip.addEventListener('click', (e) => e.stopPropagation());
         });
-        article.addEventListener('click', () => navigateToDetail(item.id));
+        const currentTerm = searchInput.value.trim();
+        article.addEventListener('click', () => navigateToDetail(item.id, currentTerm));
         article.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            navigateToDetail(item.id);
+            navigateToDetail(item.id, currentTerm);
           }
         });
         resultsList.appendChild(article);
@@ -442,9 +470,9 @@
       resultsList.classList.remove('hidden');
     }
 
-    function navigateToDetail(id) {
+    function navigateToDetail(id, term) {
       if (!id) return;
-      window.location.href = buildFatwaDetailUrl(id);
+      window.location.href = buildFatwaDetailUrl(id, term);
     }
 
   </script>

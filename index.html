@@ -441,6 +441,25 @@
     }
 
     function formatResults(hits, type) {
+      const term = searchInput.value.trim();
+
+      const getHighlighted = (hit, attr, fallback) => {
+        if (hit._highlightResult && hit._highlightResult[attr] && hit._highlightResult[attr].value) {
+          return hit._highlightResult[attr].value;
+        }
+        if (hit._snippetResult && hit._snippetResult[attr] && hit._snippetResult[attr].value) {
+          return hit._snippetResult[attr].value;
+        }
+        return highlightText(fallback || '', term);
+      };
+
+      const highlightText = (text, query) => {
+        if (!query || !text) return text;
+        const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${safeQuery})`, 'gi');
+        return text.replace(regex, '<span class="highlight-red">$1</span>');
+      };
+
       return hits.map(hit => {
         let title = '';
         let snippet = '';
@@ -448,9 +467,9 @@
         let meta = '';
 
         if (type === 'hadith') {
-          title = hit.text ? hit.text.substring(0, 100) + "..." : "حديث شريف";
-          snippet = hit.text || "";
-          link = `details_hadith.html?id=${hit.objectID}`;
+          title = getHighlighted(hit, 'text', hit.text ? hit.text.substring(0, 100) + "..." : "حديث شريف");
+          snippet = getHighlighted(hit, 'text', hit.text || "");
+          link = `details_hadith.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
           let hukmBadge = '';
           if (hit.hukm) {
             const h = Array.isArray(hit.hukm) ? hit.hukm[0] : hit.hukm;
@@ -471,35 +490,35 @@
             </div>
           `;
         } else if (type === 'scholars') {
-          title = hit.name || "بطاقة تراجم";
-          snippet = hit.trj ? hit.trj.substring(0, 200) + "..." : "";
+          title = getHighlighted(hit, 'name', hit.name || "بطاقة تراجم");
+          snippet = getHighlighted(hit, 'trj', hit.trj ? hit.trj.substring(0, 200) + "..." : "");
           const docId = hit.objectID || hit.id;
-          link = `details_scholars.html?id=${docId}`;
+          link = `details_scholars.html?id=${docId}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-info">تراجم</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
         } else if (type === 'history') {
-          title = hit.name || "بدون عنوان";
+          title = getHighlighted(hit, 'name', hit.name || "بدون عنوان");
           const content = hit.full_intro || hit.text || "";
-          snippet = content.substring(0, 200) + "...";
-          link = `history.html?id=${hit.objectID}`;
+          snippet = getHighlighted(hit, 'full_intro', content.substring(0, 200) + "...");
+          link = `history.html?id=${hit.objectID}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-warning">سير الأعلام</span>`;
         } else if (type === 'fatawa') {
           const fatwaId = hit.objectID || hit.id || '';
-          title = stripPlaceholderDomain(hit.question || "فتوى");
+          title = getHighlighted(hit, 'question', stripPlaceholderDomain(hit.question || "فتوى"));
           const answerPreview = stripPlaceholderDomain(hit.answer_snippet || hit.answer || hit.text || "لا يوجد نص للجواب.");
-          snippet = truncateText(answerPreview, 220);
-          link = buildFatwaDetailUrl(fatwaId);
+          snippet = getHighlighted(hit, 'answer', truncateText(answerPreview, 220));
+          link = buildFatwaDetailUrl(fatwaId) + `&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-info">فتوى</span> ${hit.source ? hit.source.replace('.html', '') : ''}`;
         } else if (type === 'firebase') {
-          title = hit.name || "سيرة معرفية";
+          title = highlightText(hit.name || "سيرة معرفية", term);
           const content = hit.trj || hit.summary || "";
-          snippet = content.substring(0, 220) + "...";
+          snippet = highlightText(content.substring(0, 220) + "...", term);
           const docId = hit.id || hit.objectID;
-          link = `details_scholars.html?id=${docId}`;
+          link = `details_scholars.html?id=${docId}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-success">قاعدة Firebase</span> ${hit.death ? 'توفي: ' + hit.death : ''}`;
         } else if (type === 'jarh') {
-          title = hit['الاسم'] || "راوي بدون اسم";
+          title = highlightText(hit['الاسم'] || "راوي بدون اسم", term);
           snippet = `رتبة ابن حجر: ${hit['الرتبة عند ابن حجر'] || '-'} | رتبة الذهبي: ${hit['الرتبة عند الذهبي'] || '-'}`;
-          link = `details_jarh.html?id=${hit.id || hit.objectID}`;
+          link = `details_jarh.html?id=${hit.id || hit.objectID}&q=${encodeURIComponent(term)}`;
           meta = `<span class="badge badge-warning">الجرح والتعديل</span>`;
         }
 
