@@ -1,12 +1,12 @@
 /* Global Reset & Typography */
 :root {
-    --primary-color: #1a2634;
-    --accent-color: #3498db;
+    --primary-color: #027d8d;
+    --accent-color: #011e1f;
     --accent-hover: #2980b9;
     --bg-color: #f8f9fa;
     --card-bg: #ffffff;
-    --text-color: #2c3e50;
-    --secondary-text: #5f6c7b;
+    --text-color: #00050a;
+    --secondary-text: #000000;
     --border-color: #e2e8f0;
     --paper-color: #fffdf7;
     --paper-border: #f4e6c5;
@@ -17,8 +17,8 @@
     /* Green for Sahih */
     --danger-color: #c0392b;
     /* Red for Mawdoo/Da'eef */
-    --warning-color: #f39c12;
-    --brown-color: #8d6e63;
+    --warning-color: #915900;
+    --brown-color: #cb3600;
     /* Brown for Metadata */
 }
 
@@ -312,6 +312,7 @@ body {
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -591,7 +592,9 @@ body {
 }
 
 .result-title a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    color: var(--accent-hover);
+    opacity: 0.85;
 }
 
 .result-meta {

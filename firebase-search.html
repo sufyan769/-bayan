@@ -44,7 +44,8 @@
     }
 
     .wiki-link:hover {
-      text-decoration: underline;
+      text-decoration: none;
+      color: #2a4b8d;
     }
 
     .wiki-box {
@@ -318,7 +319,7 @@
 
         div.innerHTML = `
           <h3 class="text-xl font-serif font-bold mb-2">
-            <a href="details_scholars.html?id=${item.id}" class="text-[#3366cc] hover:underline decoration-[#3366cc]">
+            <a href="details_scholars.html?id=${item.id}" class="text-[#3366cc] hover:text-[#2a4b8d] decoration-[#3366cc]">
               ${item.name}
             </a>
           </h3>
@@ -327,7 +328,7 @@
           </p>
           <div class="mt-3 text-xs text-stone-500 flex gap-3">
             ${item.death ? `<span>(ت: ${item.death})</span>` : ''}
-            <a href="details_scholars.html?id=${item.id}" class="text-[#3366cc] hover:underline mr-auto">اقرأ المزيد &larr;</a>
+            <a href="details_scholars.html?id=${item.id}" class="text-[#3366cc] hover:text-[#2a4b8d] mr-auto">اقرأ المزيد &larr;</a>
           </div>
         `;
         featuredGrid.appendChild(div);
@@ -395,7 +396,7 @@
 
         div.innerHTML = `
           <div class="mb-1">
-            <a href="details_scholars.html?id=${doc.id}&q=${encodeURIComponent(term)}" class="text-xl text-[#3366cc] hover:underline font-serif font-bold">
+            <a href="details_scholars.html?id=${doc.id}&q=${encodeURIComponent(term)}" class="text-xl text-[#3366cc] hover:text-[#2a4b8d] font-serif font-bold">
               ${nameHtml}
             </a>
           </div>
