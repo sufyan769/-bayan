@@ -544,7 +544,18 @@
 
     function formatParagraphHTML(text) {
       if (!text) return '';
-      return text.split(/\n+/).map(line => line.trim()).filter(Boolean).map(line => `<p>${line}</p>`).join('');
+      // Join single newlines as spaces, preserve double newlines as paragraph breaks
+      // And also start a new line after . and ،
+      const processedText = text.trim()
+        .replace(/\r\n/g, '\n')
+        .replace(/\n{2,}/g, '|||')
+        .replace(/\n/g, ' ')
+        .replace(/([.،])\s*/g, '$1|||')
+        .split('|||')
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      return processedText.map(p => `<p>${p}</p>`).join('');
     }
 
     function renderResults(results) {

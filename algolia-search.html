@@ -322,9 +322,18 @@
       if (!cleaned) return fallback;
       if (hasHTMLMarkup(cleaned)) return convertFatwaLinks(cleaned);
       if (!wrapParagraphs) return cleaned.replace(/\n/g, '<br>');
-      const parts = cleaned.split(/\n+/).map(line => line.trim()).filter(Boolean);
-      if (!parts.length) return fallback;
-      return convertFatwaLinks(parts.map(line => `<p>${line}</p>`).join(''));
+
+      // Join single newlines as spaces, preserve double newlines as paragraph breaks
+      const processedText = cleaned
+        .replace(/\r\n/g, '\n')
+        .replace(/\n{2,}/g, '|||')
+        .replace(/\n/g, ' ')
+        .replace(/([.،])\s*/g, '$1|||')
+        .split('|||')
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      return convertFatwaLinks(processedText.map(p => `<p>${p}</p>`).join(''));
     };
 
     document.addEventListener('DOMContentLoaded', () => {
