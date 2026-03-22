@@ -1,43 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://sufyan769.github.io/-bayan/index.html</loc>
+    <loc>https://bayan-inky.vercel.app/</loc>
+    <lastmod>2026-03-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+
   <url>
-    <loc>https://sufyan769.github.io/-bayan/index.html?tab=hadith</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://sufyan769.github.io/-bayan/index.html?tab=scholars</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://sufyan769.github.io/-bayan/history.html</loc>
+    <loc>https://bayan-inky.vercel.app/index.html?tab=hadith</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+
   <url>
-    <loc>https://sufyan769.github.io/-bayan/algolia-search.html</loc>
+    <loc>https://bayan-inky.vercel.app/index.html?tab=scholars</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+
   <url>
-    <loc>https://sufyan769.github.io/-bayan/fatwa.html</loc>
+    <loc>https://bayan-inky.vercel.app/index.html?tab=history</loc>
     <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://bayan-inky.vercel.app/index.html?tab=fatawa</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://bayan-inky.vercel.app/algolia-search.html</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://sufyan769.github.io/-bayan/jarh_search.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://sufyan769.github.io/-bayan/firebase-search.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
 </urlset>
