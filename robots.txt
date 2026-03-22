@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sufyan769.github.io/-bayan/sitemap.xml
+Sitemap: https://bayan-inky.vercel.app/sitemap.xml
