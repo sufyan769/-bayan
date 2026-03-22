@@ -545,12 +545,12 @@
     function formatParagraphHTML(text) {
       if (!text) return '';
       // Join single newlines as spaces, preserve double newlines as paragraph breaks
-      // And also start a new line after . and ،
+      // And also start a new line after .
       const processedText = text.trim()
         .replace(/\r\n/g, '\n')
         .replace(/\n{2,}/g, '|||')
         .replace(/\n/g, ' ')
-        .replace(/([.،])\s*/g, '$1|||')
+        .replace(/([.])\s*/g, '$1|||')
         .split('|||')
         .map(p => p.trim())
         .filter(Boolean);
