@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://bayan-inky.vercel.app/sitemap.xml
