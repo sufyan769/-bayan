@@ -213,15 +213,16 @@
       }
     };
 
-    const isLocal = window.location.protocol === 'file:';
+    const isStaticHost = window.location.protocol === 'file:' || window.location.hostname.includes('github.io');
     const buildDetailUrl = (type, id, term = '') => {
       if (!id) return '#';
       const q = term ? `&q=${encodeURIComponent(term)}` : '';
-      if (isLocal) {
-        // Local path lookup (ensure we go to details/...)
-        return `details/${type === 'scholars' || type === 'firebase' ? 'scholar' : type}.html?id=${encodeURIComponent(id)}${q}`;
+      if (isStaticHost) {
+        // Use relative paths with query params for static hosts
+        const page = (type === 'scholars' || type === 'firebase') ? 'scholar' : type;
+        return `details/${page}.html?id=${encodeURIComponent(id)}${q}`;
       }
-      // Production Clean URLs
+      // Production Clean URLs (Vercel)
       const pathType = (type === 'scholars' || type === 'firebase') ? 'scholar' : type;
       return `/${pathType}/${encodeURIComponent(id)}${q ? '?' + q.substring(1) : ''}`;
     };
