@@ -1,6 +1,4 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     { "source": "/hadith/:id", "destination": "/details/hadith.html?id=:id" },
     { "source": "/scholar/:id", "destination": "/details/scholar.html?id=:id" },
