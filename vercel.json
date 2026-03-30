@@ -1,10 +1,10 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/hadith/:id", "destination": "/details/hadith.html?id=:id" },
-    { "source": "/scholar/:id", "destination": "/details/scholar.html?id=:id" },
-    { "source": "/fatwa/:id", "destination": "/details/fatwa.html?id=:id" },
-    { "source": "/history/:id", "destination": "/details/history.html?id=:id" },
-    { "source": "/jarh/:id", "destination": "/details/jarh.html?id=:id" }
+    { "source": "/hadith/(?<id>[^/]+)", "destination": "/details/hadith?id=:id" },
+    { "source": "/scholar/(?<id>[^/]+)", "destination": "/details/scholar?id=:id" },
+    { "source": "/fatwa/(?<id>[^/]+)", "destination": "/details/fatwa?id=:id" },
+    { "source": "/history/(?<id>[^/]+)", "destination": "/details/history?id=:id" },
+    { "source": "/jarh/(?<id>[^/]+)", "destination": "/details/jarh?id=:id" }
   ]
 }
